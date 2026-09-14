@@ -24,7 +24,9 @@ export default function Layout() {
                 <div className="ml-auto flex items-center gap-4 pr-8">
 
                     
-                    <Link className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-opacity hover:opacity-70">
+                    <Link
+                    to="/home/notifications" 
+                    className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-opacity hover:opacity-70">
                         <svg width="30" height="30" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M20 37.5C21.2156 37.4988 22.4046 37.1435 23.4216 36.4775C24.4385 35.8116 25.2395 34.8638 25.7266 
                             33.75H14.2734C14.7605 34.8638 15.5615 35.8116 16.5784 36.4775C17.5954 37.1435 18.7844 37.4988 20 37.5ZM31.25 
@@ -72,8 +74,10 @@ export default function Layout() {
 
                     </Link>
 
-                    <Link className="w-[40px] h-[40px] flex items-center justify-center"
-                    
+                    <Link 
+                    to="/home/sales"
+                    className="w-[40px] h-[40px] flex items-center justify-center"
+            
                     >
                         { /* Venta */}
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -84,7 +88,11 @@ export default function Layout() {
 
                     </Link>
 
-                    <Link className="w-[40px] h-[40px] flex items-center justify-center">
+                    <Link 
+                    to="/home/purchases"
+                    className="w-[40px] h-[40px] flex items-center justify-center"
+                    
+                    >
                         { /* Mis compras */}
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fillRule='evenodd' clipRule='evenodd' d="M13.7502 10.025C13.7501 10.0167 13.75 10.0085 13.75 10.0002V8.3335C13.75 4.88171 16.5482 2.0835 20 2.0835C23.4518 2.0835 26.25 4.88171 26.25 8.3335V10.0002C26.25 10.0085 26.25 10.0167 26.2498 10.025C28.3952 10.0894 29.708 10.3208 30.7102 11.1526C32.0988 12.3051 32.4645 14.2558 33.1962 18.1573L34.4462 24.824C35.4748 30.3102 35.989 33.0532 34.4895 34.86C32.99 36.6668 30.1992 36.6668 24.6173 36.6668H15.3826C9.80079 36.6668 7.00991 36.6668 5.51039 34.86C4.01086 33.0532 4.52519 30.3102 5.55384 24.824L6.80384 18.1573C7.53536 14.2558 7.90113 12.3051 9.28976 11.1526C10.292 10.3208 11.6048 10.0894 13.7502 10.025ZM16.25 8.3335C16.25 6.26243 17.929 4.5835 20 4.5835C22.071 4.5835 23.75 6.26243 23.75 8.3335V10.0002C23.75 10.0002 23.75 10.0001 23.75 10.0002C23.6245 10.0001 23.497 10.0002 23.3673 10.0002H16.6326C16.5029 10.0002 16.3754 10.0002 16.25 10.0002V8.3335ZM25.7808 18.1908C26.32 18.622 26.4073 19.4087 25.976 19.9477L19.3093 28.281C19.0873 28.5587 18.7575 28.7287 18.4025 28.7483C18.0475 28.768 17.7008 28.6355 17.4495 28.3842L14.1161 25.0508C13.6279 24.5627 13.6279 23.7712 14.1161 23.283C14.6042 22.7948 15.3957 22.7948 15.8838 23.283L18.2292 25.6283L24.0238 18.386C24.4552 17.847 25.2418 17.7595 25.7808 18.1908Z" fill="#252429" />
@@ -92,7 +100,11 @@ export default function Layout() {
 
                     </Link>
 
-                    <Link className="w-[40px] h-[40px] flex items-center justify-center">
+                    <Link 
+                    to="/home/publications"
+                    className="w-[40px] h-[40px] flex items-center justify-center"
+                    
+                    >
                         { /* Publicaciones */}
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fillRule='evenodd' clipRule='evenodd' d="M20 36.6668C29.2046 36.6668 36.6666 29.2048 36.6666 20.0002C36.6666 10.7954 29.2046 3.3335 20 3.3335C10.7952 3.3335 3.33331 10.7954 3.33331 20.0002C3.33331 22.6663 3.95935 25.1862 5.07241 27.421C5.36821 28.0148 5.46666 28.6937 5.29518 29.3345L4.3025 33.0447C3.87156 34.6552 5.345 36.1285 6.95556 35.6977L10.6656 34.705C11.3065 34.5335 11.9853 34.632 12.5792 34.9277C14.8139 36.0408 17.3338 36.6668 20 36.6668ZM13.3333 22.0835C12.643 22.0835 12.0833 22.6432 12.0833 23.3335C12.0833 24.0238 12.643 24.5835 13.3333 24.5835H22.5C23.1903 24.5835 23.75 24.0238 23.75 23.3335C23.75 22.6432 23.1903 22.0835 22.5 22.0835H13.3333ZM12.0833 17.5002C12.0833 16.8098 12.643 16.2502 13.3333 16.2502H26.6666C27.357 16.2502 27.9166 16.8098 27.9166 17.5002C27.9166 18.1905 27.357 18.7502 26.6666 18.7502H13.3333C12.643 18.7502 12.0833 18.1905 12.0833 17.5002Z" fill="#252429" />
@@ -100,7 +112,11 @@ export default function Layout() {
 
                     </Link>
 
-                    <Link className="w-[40px] h-[40px] flex items-center justify-center">
+                    <Link 
+                    to="/home/location"
+                    className="w-[40px] h-[40px] flex items-center justify-center"
+                    
+                    >
                         { /* Locacion */}
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M20 36.667C29.2046 36.667 36.6666 33.3091 36.6666 29.167C36.6666 27.056 34.7283 25.1485 31.609 23.7856C29.7055 27.2786 26.8028 30.2895 23.1158 31.8651C21.134 32.7121 18.866 32.7121 16.8841 31.8651C13.1971 30.2895 10.2944 27.2786 8.39095 23.7856C5.27156 25.1485 3.33331 27.056 3.33331 29.167C3.33331 33.3091 10.7952 36.667 20 36.667Z" fill="#252429" />
@@ -110,7 +126,9 @@ export default function Layout() {
                     </Link>
 
                     <div className='py-60'>
-                        <Link className="w-[40px] h-[40px] flex items-center justify-center mb-6">
+                        <Link 
+                        to="/home/reports"  
+                        className="w-[40px] h-[40px] flex items-center justify-center mb-6">
                             { /* Reportes */}
                             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path fillRule='evenodd' clipRule='evenodd' d="M27.5 26.25C24.9687 26.25 22.9167 28.302 22.9167 30.8333C22.9167 31.6673 23.1387 32.4485 23.5279 33.122L29.7887 26.8612C29.1152 26.472 28.334 26.25 27.5 26.25ZM31.5327 28.6527L25.3194 34.866C25.9677 35.2175 26.7102 35.4167 27.5 35.4167C30.0314 35.4167 32.0834 33.3647 32.0834 30.8333C32.0834 30.0435 31.8842 29.301 31.5327 28.6527ZM20.4167 30.8333C20.4167 26.9213 23.588 23.75 27.5 23.75C29.4817 23.75 31.2754 24.5655 32.5595 25.876C33.8102 27.1523 34.5834 28.9038 34.5834 30.8333C34.5834 34.7453 31.412 37.9167 27.5 37.9167C25.5705 37.9167 23.819 37.1435 22.5427 35.8928C21.2322 34.6087 20.4167 32.815 20.4167 30.8333Z" fill="#252429" />

@@ -1,4 +1,5 @@
 import Products from "../componentes/Products"
+import { Link } from "react-router-dom"
 
 export default function Home() {
     return (
@@ -55,7 +56,12 @@ export default function Home() {
                     <div className="row mt-5">
                         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 
-                            <Products />
+                            <Link to="/home/productDetail" className="block">
+                                <Products />
+                            </Link>
+                            <Link to="/home/productDetail" className="block">
+                                <Products />
+                            </Link>
                             <Products />
                             <Products />
                             <Products />

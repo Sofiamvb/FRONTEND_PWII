@@ -1,42 +1,35 @@
 import { createBrowserRouter } from 'react-router-dom'
+//USERS
 import Layout from './layouts/Layout'
 import LayoutAuth from './layouts/LayoutAuth'
-import Login from './views/login'
-import LandingPage from './views/landingPage'
-import Register from './views/register'
-import Verification from './views/verification'
-import Home from './views/home'
-import Profile from './views/profile'
+import Login from './views/usuarios/login'
+import LandingPage from './views/usuarios/landingPage'
+import Register from './views/usuarios/register'
+import Verification from './views/usuarios/verification'
+import Home from './views/productos/home'
+import Profile from './views/usuarios/profile'
 import LayoutLanding from './layouts/LayoutLanding'
-import ConoceMas from './views/conoceMas'
-import Nosotros from './views/nosotros'
-import Sales from './views/sales'
-import Purchases from './views/purchases'
-import Publications from './views/publications'
-import Location from './views/location'
-import Reports from './views/reports'
-import Notifications from './views/notifications'
-import PublishMaterial from './views/publishMaterial'
-import ProductDetail from './views/productDetail'
-import Checkout from './views/checkout'
-import PurchaseDetail from './views/purchaseDetail'
-import SaleDetail from './views/saleDetail'
-
-
-
+import ConoceMas from './views/usuarios/conoceMas'
+import Nosotros from './views/usuarios/nosotros'
+import Reports from './views/usuarios/reports'
+//PRODUCTS
+import Sales from './views/productos/sales'
+import Purchases from './views/productos/purchases'
+import Publications from './views/productos/publications'
+import PublishMaterial from './views/productos/publishMaterial'
+import ProductDetail from './views/productos/productDetail'
+import Checkout from './views/productos/checkout'
+import PurchaseDetail from './views/productos/purchaseDetail'
+import SaleDetail from './views/productos/saleDetail'
+//ADMIN
 import LayoutAdmin from './layouts/LayoutAdmin'
-import Admincategorias from './views/Admincategorias'
-import Admin_productos from './views/Admin_productos' 
-import Adminpuntos from './views/Adminpuntos'
-import Admintransacciones from './views/Admintransacciones'  
-import AdminReportes from './views/Adminreportes'
-import Adminusuarios from './views/Adminusuarios'
-import Adminverificacion from './views/Adminverificacion'
-
-
-
-
-
+import Admincategorias from './views/admins/Admincategorias'
+import Admin_productos from './views/admins/Admin_productos' 
+import Adminpuntos from './views/admins/Adminpuntos'
+import Admintransacciones from './views/admins/Admintransacciones'  
+import AdminReportes from './views/admins/Adminreportes'
+import Adminusuarios from './views/admins/Adminusuarios'
+import Adminverificacion from './views/admins/Adminverificacion'
 
 export const router = createBrowserRouter([
     
@@ -69,11 +62,11 @@ export const router = createBrowserRouter([
                 element: <Home />
             },
             {
-                path: 'productDetail',
+                path: 'productDetail/:idProducto',
                 element: <ProductDetail />
             },
             {
-                path: 'checkout',
+                path: 'checkout/:idProducto',
                 element: <Checkout />
             },
             {
@@ -81,7 +74,7 @@ export const router = createBrowserRouter([
                 element: <Sales />
             },
             {
-                path: 'sales/detail',
+                path: 'sales/detail/:idProducto',
                 element: <SaleDetail />
             },
             {
@@ -89,7 +82,7 @@ export const router = createBrowserRouter([
                 element: <Purchases />
             },
             {
-                path: 'purchases/detail',
+                path: 'purchases/detail/:idPedido',
                 element: <PurchaseDetail />
             },
             {
@@ -101,16 +94,8 @@ export const router = createBrowserRouter([
                 element: <PublishMaterial />
             },
             {
-                path:'location',
-                element: <Location />
-            },
-            {
                 path:'reports',
                 element: <Reports />
-            },
-            {
-                path:'notifications',
-                element: <Notifications />
             },
             {
                 path:'profile',

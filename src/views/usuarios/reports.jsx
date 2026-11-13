@@ -3,21 +3,13 @@ export default function Reports() {
         <>
             <div className="min-h-screen w-full bg-[#FFFFED] pb-8 pt-24 px-8 md:pb-12 md:pt-32 md:pr-12 md:pl-32 lg:pl-64 font-sans">
 
-                {/* =====================================================
-                    CONTENIDO PRINCIPAL
-                ====================================================== */}
                 <div className="grid grid-cols-1 gap-10 xl:grid-cols-[1.05fr_0.95fr]">
 
-                    {/* =================================================
-                        COLUMNA IZQUIERDA
-                        REPORTAR UN PROBLEMA
-                    ================================================== */}
                     <div>
 
-                        <h1 className="mb-10 text-4xl font-extrabold text-[#1f1f22]">
+                        <h1 className="ml-6 mb-10 text-4xl font-extrabold text-[#1f1f22]">
                             Reportar un Problema
                         </h1>
-
 
                         {/* TARJETA DEL FORMULARIO */}
                         <div
@@ -32,9 +24,6 @@ export default function Reports() {
                             "
                         >
 
-                            {/* =========================
-                                TIPO
-                            ========================== */}
                             <div className="mb-7">
 
                                 <label
@@ -111,10 +100,6 @@ export default function Reports() {
 
                             </div>
 
-
-                            {/* =========================
-                                MOTIVO
-                            ========================== */}
                             <div className="mb-7">
 
                                 <label
@@ -130,7 +115,6 @@ export default function Reports() {
                                     Motivo:
                                 </label>
 
-
                                 <div className="relative">
 
                                     <select
@@ -140,9 +124,7 @@ export default function Reports() {
                                             h-[50px]
                                             w-full
                                             appearance-none
-                                            rounded-[17px]
-                                            border-2
-                                            border-[#1593FF]
+                                            rounded-[17px]                                           
                                             bg-[#FAFAFA]
                                             px-5
                                             pr-12
@@ -191,10 +173,6 @@ export default function Reports() {
 
                             </div>
 
-
-                            {/* =========================
-                                DESCRIPCIÓN
-                            ========================== */}
                             <div className="mb-8">
 
                                 <label
@@ -232,19 +210,15 @@ export default function Reports() {
 
                             </div>
 
-
-                            {/* =========================
-                                ENVIAR REPORTE
-                            ========================== */}
                             <button
                                 type="button"
                                 className="
                                     flex
-                                    h-[58px]
+                                    h-[50px]
                                     w-full
                                     items-center
                                     justify-center
-                                    rounded-[16px]
+                                    rounded-[50px]
                                     bg-[#E99597]
                                     text-[16px]
                                     font-extrabold
@@ -261,11 +235,6 @@ export default function Reports() {
 
                     </div>
 
-
-                    {/* =================================================
-                        COLUMNA DERECHA
-                        MIS REPORTES
-                    ================================================== */}
                     <div>
 
                         <h1 className="mb-10 text-4xl font-extrabold text-[#1f1f22]">
@@ -286,9 +255,6 @@ export default function Reports() {
                             "
                         >
 
-                            {/* =========================
-                                REPORTE 1
-                            ========================== */}
                             <div
                                 className="
                                     mb-5
@@ -358,10 +324,6 @@ export default function Reports() {
 
                             </div>
 
-
-                            {/* =========================
-                                REPORTE 2
-                            ========================== */}
                             <div
                                 className="
                                     flex
@@ -405,7 +367,6 @@ export default function Reports() {
                                     </p>
 
                                 </div>
-
 
                                 {/* ESTADO */}
                                 <span

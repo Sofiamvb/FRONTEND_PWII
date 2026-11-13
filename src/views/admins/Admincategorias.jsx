@@ -1,4 +1,53 @@
+import React, { useState } from 'react';
+import clienteAxios from "../../config/axios";
+import Swal from 'sweetalert2';
+
 export default function CategoriasAdmin() {
+
+    const [categoria, guardarCategoria] = useState({
+        nombre_categoria: ''
+    });
+
+    // Leer datos del formulario
+    const actualizarState = e => {
+        guardarCategoria({
+            ...categoria,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    // Añadir una categoría nueva
+    const agregarCategoria = async e => {
+
+        e.preventDefault();
+
+        try {
+
+            const res = await clienteAxios.post('/admin/categorias', categoria);
+
+            console.log(res);
+
+            Swal.fire({
+                title: "¡Se ha registrado!",
+                text: res.data.mensaje,
+                icon: "success"
+            });
+
+           
+
+        } catch (error) {
+
+            console.log(error);
+
+            Swal.fire({
+                icon: 'error',
+                title: "Hubo un error",
+                text: 'Intente de nuevo'
+            });
+
+        }
+    };
+
     return (
         <>
             <div className="min-h-screen w-full bg-[#FFFFED] px-8 pb-12 pt-8 md:px-12 font-sans">
@@ -10,10 +59,7 @@ export default function CategoriasAdmin() {
                     </h1>
                 </div>
 
-
-                {/* =====================================================
-                    CONTENIDO PRINCIPAL
-                ====================================================== */}
+                {/* CONTENIDO PRINCIPAL */}
                 <div
                     className="
                         grid
@@ -23,9 +69,7 @@ export default function CategoriasAdmin() {
                     "
                 >
 
-                    {/* =================================================
-                        AGREGAR / EDITAR CATEGORÍA
-                    ================================================== */}
+                    {/* PANEL AGREGAR CATEGORÍA */}
                     <div
                         className="
                             min-h-[500px]
@@ -40,112 +84,90 @@ export default function CategoriasAdmin() {
                             Agregar Nueva Categoria
                         </h2>
 
+                        {/* FORMULARIO */}
+                        <form onSubmit={agregarCategoria}>
 
-                        {/* NOMBRE */}
-                        <div className="mt-14">
+                            {/* NOMBRE */}
+                            <div className="mt-14">
 
-                            <label
-                                htmlFor="nombreCategoria"
+                                <label
+                                    htmlFor="nombreCategoria"
+                                    className="
+                                        mb-4
+                                        block
+                                        text-[16px]
+                                        font-extrabold
+                                        text-[#252429]
+                                    "
+                                >
+                                    Nombre:
+                                </label>
+
+                                <input
+                                    id="nombreCategoria"
+                                    name="nombre_categoria"
+                                    type="text"
+                                    value={categoria.nombre_categoria}
+                                    required
+                                    className="
+                                        h-[52px]
+                                        w-full
+                                        rounded-full
+                                        border
+                                        border-gray-100
+                                        bg-white
+                                        px-6
+                                        text-[14px]
+                                        text-[#252429]
+                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
+                                        outline-none
+                                    "
+                                    onChange={actualizarState}
+                                />
+
+                            </div>
+
+                            {/* BOTÓN AGREGAR */}
+                            <div
                                 className="
-                                    mb-4
-                                    block
-                                    text-[16px]
-                                    font-extrabold
-                                    text-[#252429]
-                                "
-                            >
-                                Nombre:
-                            </label>
-
-
-                            <input
-                                id="nombreCategoria"
-                                type="text"
-                                className="
-                                    h-[52px]
-                                    w-full
-                                    rounded-full
-                                    border
-                                    border-gray-100
-                                    bg-white
-                                    px-6
-                                    text-[14px]
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    outline-none
-                                "
-                            />
-
-                        </div>
-
-
-                        {/* BOTONES */}
-                        <div
-                            className="
-                                mt-12
-                                flex
-                                flex-wrap
-                                items-center
-                                justify-around
-                                gap-5
-                            "
-                        >
-
-                            {/* AGREGAR */}
-                            <button
-                                type="button"
-                                className="
+                                    mt-12
                                     flex
-                                    h-[38px]
-                                    min-w-[130px]
+                                    flex-wrap
                                     items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FAE568]
-                                    px-6
-                                    text-[13px]
-                                    font-extrabold
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    transition
-                                    hover:brightness-95
+                                    justify-around
+                                    gap-5
                                 "
                             >
-                                Agregar
-                            </button>
 
+                                <button
+                                    type="submit"
+                                    className="
+                                        flex
+                                        h-[38px]
+                                        min-w-[130px]
+                                        items-center
+                                        justify-center
+                                        rounded-full
+                                        bg-[#FAE568]
+                                        px-6
+                                        text-[13px]
+                                        font-extrabold
+                                        text-[#252429]
+                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
+                                        transition
+                                        hover:brightness-95
+                                    "
+                                >
+                                    Agregar
+                                </button>
 
-                            {/* GUARDAR */}
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    min-w-[150px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FAE568]
-                                    px-6
-                                    text-[13px]
-                                    font-extrabold
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Guardar cambios
-                            </button>
+                            </div>
 
-                        </div>
+                        </form>
 
                     </div>
 
-
-                    {/* =================================================
-                        LISTADO DE CATEGORÍAS
-                    ================================================== */}
+                    {/* PANEL LISTADO DE CATEGORÍAS */}
                     <div
                         className="
                             min-h-[500px]
@@ -173,7 +195,6 @@ export default function CategoriasAdmin() {
                                 Categorias
                             </h2>
 
-
                             {/* BUSCADOR */}
                             <div className="w-full md:w-[280px]">
 
@@ -200,10 +221,7 @@ export default function CategoriasAdmin() {
 
                         </div>
 
-
-                        {/* =================================================
-                            CATEGORÍA 1
-                        ================================================== */}
+                        {/* CATEGORÍA 1 */}
                         <div
                             className="
                                 mb-6
@@ -218,7 +236,6 @@ export default function CategoriasAdmin() {
                                 Electrónica
                             </p>
 
-
                             <button
                                 type="button"
                                 className="
@@ -239,7 +256,6 @@ export default function CategoriasAdmin() {
                             >
                                 Editar
                             </button>
-
 
                             <button
                                 type="button"
@@ -264,10 +280,7 @@ export default function CategoriasAdmin() {
 
                         </div>
 
-
-                        {/* =================================================
-                            CATEGORÍA 2
-                        ================================================== */}
+                        {/* CATEGORÍA 2 */}
                         <div
                             className="
                                 mb-6
@@ -282,7 +295,6 @@ export default function CategoriasAdmin() {
                                 Realidad Virtual
                             </p>
 
-
                             <button
                                 type="button"
                                 className="
@@ -303,7 +315,6 @@ export default function CategoriasAdmin() {
                             >
                                 Editar
                             </button>
-
 
                             <button
                                 type="button"
@@ -328,10 +339,7 @@ export default function CategoriasAdmin() {
 
                         </div>
 
-
-                        {/* =================================================
-                            CATEGORÍA 3
-                        ================================================== */}
+                        {/* CATEGORÍA 3 */}
                         <div
                             className="
                                 mb-6
@@ -346,7 +354,6 @@ export default function CategoriasAdmin() {
                                 Libros
                             </p>
 
-
                             <button
                                 type="button"
                                 className="
@@ -367,7 +374,6 @@ export default function CategoriasAdmin() {
                             >
                                 Editar
                             </button>
-
 
                             <button
                                 type="button"
@@ -392,10 +398,7 @@ export default function CategoriasAdmin() {
 
                         </div>
 
-
-                        {/* =================================================
-                            CATEGORÍA 4
-                        ================================================== */}
+                        {/* CATEGORÍA 4 */}
                         <div
                             className="
                                 mb-6
@@ -410,7 +413,6 @@ export default function CategoriasAdmin() {
                                 Herramientas
                             </p>
 
-
                             <button
                                 type="button"
                                 className="
@@ -431,7 +433,6 @@ export default function CategoriasAdmin() {
                             >
                                 Editar
                             </button>
-
 
                             <button
                                 type="button"
@@ -456,10 +457,7 @@ export default function CategoriasAdmin() {
 
                         </div>
 
-
-                        {/* =================================================
-                            CATEGORÍA 5
-                        ================================================== */}
+                        {/* CATEGORÍA 5 */}
                         <div
                             className="
                                 grid
@@ -472,7 +470,6 @@ export default function CategoriasAdmin() {
                             <p className="text-[18px] font-extrabold text-[#252429]">
                                 Multimedia
                             </p>
-
 
                             <button
                                 type="button"
@@ -494,7 +491,6 @@ export default function CategoriasAdmin() {
                             >
                                 Editar
                             </button>
-
 
                             <button
                                 type="button"
@@ -525,5 +521,5 @@ export default function CategoriasAdmin() {
 
             </div>
         </>
-    )
+    );
 }

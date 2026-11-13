@@ -1,7 +1,18 @@
 import { Link } from 'react-router-dom'
 import { Outlet } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 
 export default function Layout() {
+
+    const navigate = useNavigate();
+
+    function logout() {
+
+        sessionStorage.clear();
+
+        navigate('/auth');
+
+    }
 
     return (
         <>
@@ -23,10 +34,10 @@ export default function Layout() {
 
                 <div className="ml-auto flex items-center gap-4 pr-8">
 
-                    
+
                     <Link
-                    to="/home/notifications" 
-                    className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-opacity hover:opacity-70">
+                        to="/home/notifications"
+                        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-opacity hover:opacity-70">
                         <svg width="30" height="30" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M20 37.5C21.2156 37.4988 22.4046 37.1435 23.4216 36.4775C24.4385 35.8116 25.2395 34.8638 25.7266 
                             33.75H14.2734C14.7605 34.8638 15.5615 35.8116 16.5784 36.4775C17.5954 37.1435 18.7844 37.4988 20 37.5ZM31.25 
@@ -35,10 +46,10 @@ export default function Layout() {
                         </svg>
                     </Link>
 
-                    
-                    <Link 
-                    to="/home/profile"
-                    className="flex h-10 w-10 cursor-pointer items-center justify-center">
+
+                    <Link
+                        to="/home/profile"
+                        className="flex h-10 w-10 cursor-pointer items-center justify-center">
                         <svg width="30" height="30" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M20 3.75C11.0398 3.75 3.75 11.0398 3.75 20C3.75 28.9602 11.0398 36.25 20 36.25C28.9602 36.25 
                             36.25 28.9602 36.25 20C36.25 11.0398 28.9602 3.75 20 3.75ZM16.0766 12.8766C17.0664 11.8273 18.4594 11.25 
@@ -74,10 +85,10 @@ export default function Layout() {
 
                     </Link>
 
-                    <Link 
-                    to="/home/sales"
-                    className="w-[40px] h-[40px] flex items-center justify-center"
-            
+                    <Link
+                        to="/home/sales"
+                        className="w-[40px] h-[40px] flex items-center justify-center"
+
                     >
                         { /* Venta */}
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -88,10 +99,10 @@ export default function Layout() {
 
                     </Link>
 
-                    <Link 
-                    to="/home/purchases"
-                    className="w-[40px] h-[40px] flex items-center justify-center"
-                    
+                    <Link
+                        to="/home/purchases"
+                        className="w-[40px] h-[40px] flex items-center justify-center"
+
                     >
                         { /* Mis compras */}
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -100,10 +111,10 @@ export default function Layout() {
 
                     </Link>
 
-                    <Link 
-                    to="/home/publications"
-                    className="w-[40px] h-[40px] flex items-center justify-center"
-                    
+                    <Link
+                        to="/home/publications"
+                        className="w-[40px] h-[40px] flex items-center justify-center"
+
                     >
                         { /* Publicaciones */}
                         <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -112,23 +123,10 @@ export default function Layout() {
 
                     </Link>
 
-                    <Link 
-                    to="/home/location"
-                    className="w-[40px] h-[40px] flex items-center justify-center"
-                    
-                    >
-                        { /* Locacion */}
-                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M20 36.667C29.2046 36.667 36.6666 33.3091 36.6666 29.167C36.6666 27.056 34.7283 25.1485 31.609 23.7856C29.7055 27.2786 26.8028 30.2895 23.1158 31.8651C21.134 32.7121 18.866 32.7121 16.8841 31.8651C13.1971 30.2895 10.2944 27.2786 8.39095 23.7856C5.27156 25.1485 3.33331 27.056 3.33331 29.167C3.33331 33.3091 10.7952 36.667 20 36.667Z" fill="#252429" />
-                            <path fillRule='evenodd' clipRule='evenodd' d="M8.33331 14.1912C8.33331 8.19466 13.5567 3.3335 20 3.3335C26.4433 3.3335 31.6666 8.19466 31.6666 14.1912C31.6666 20.1408 27.943 27.0833 22.1335 29.5662C20.7791 30.1448 19.2208 30.1448 17.8665 29.5662C12.0569 27.0833 8.33331 20.1408 8.33331 14.1912ZM20 18.3335C21.841 18.3335 23.3333 16.8412 23.3333 15.0002C23.3333 13.1592 21.841 11.6668 20 11.6668C18.159 11.6668 16.6666 13.1592 16.6666 15.0002C16.6666 16.8412 18.159 18.3335 20 18.3335Z" fill="#252429" />
-                        </svg>
-
-                    </Link>
-
                     <div className='py-60'>
-                        <Link 
-                        to="/home/reports"  
-                        className="w-[40px] h-[40px] flex items-center justify-center mb-6">
+                        <Link
+                            to="/home/reports"
+                            className="w-[40px] h-[40px] flex items-center justify-center mb-6">
                             { /* Reportes */}
                             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path fillRule='evenodd' clipRule='evenodd' d="M27.5 26.25C24.9687 26.25 22.9167 28.302 22.9167 30.8333C22.9167 31.6673 23.1387 32.4485 23.5279 33.122L29.7887 26.8612C29.1152 26.472 28.334 26.25 27.5 26.25ZM31.5327 28.6527L25.3194 34.866C25.9677 35.2175 26.7102 35.4167 27.5 35.4167C30.0314 35.4167 32.0834 33.3647 32.0834 30.8333C32.0834 30.0435 31.8842 29.301 31.5327 28.6527ZM20.4167 30.8333C20.4167 26.9213 23.588 23.75 27.5 23.75C29.4817 23.75 31.2754 24.5655 32.5595 25.876C33.8102 27.1523 34.5834 28.9038 34.5834 30.8333C34.5834 34.7453 31.412 37.9167 27.5 37.9167C25.5705 37.9167 23.819 37.1435 22.5427 35.8928C21.2322 34.6087 20.4167 32.815 20.4167 30.8333Z" fill="#252429" />
@@ -137,16 +135,18 @@ export default function Layout() {
                             </svg>
                         </Link>
 
-                        <Link 
-                        to="/"
-                        className="w-[40px] h-[40px] flex items-center justify-center py-12">
+                        <button
+                            className="w-[40px] h-[40px] flex items-center justify-center py-12"
+                            onClick={logout}>
                             { /* Logout */}
                             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path fillRule='evenodd' clipRule='evenodd' d="M26.875 20C26.875 19.3097 26.3153 18.75 25.625 18.75H7.33738L10.6051 15.9491C11.1293 15.4998 11.19 14.7107 10.7407 14.1865C10.2914 13.6624 9.50231 13.6017 8.97816 14.051L3.14483 19.051C2.86776 19.2884 2.70831 19.6352 2.70831 20C2.70831 20.3649 2.86776 20.7117 3.14483 20.949L8.97816 25.949C9.50231 26.3984 10.2914 26.3377 10.7407 25.8135C11.19 25.2894 11.1293 24.5002 10.6051 24.051L7.33738 21.25H25.625C26.3153 21.25 26.875 20.6904 26.875 20Z" fill="#252429" />
                                 <path d="M15.625 13.3335C15.625 14.5038 15.625 15.089 15.9059 15.5093C16.0275 15.6913 16.1837 15.8476 16.3658 15.9692C16.7862 16.2501 17.3713 16.2501 18.5417 16.2501H25.625C27.696 16.2501 29.375 17.929 29.375 20.0002C29.375 22.0712 27.696 23.7502 25.625 23.7502H18.5417C17.3713 23.7502 16.786 23.7502 16.3657 24.031C16.1837 24.1527 16.0275 24.3088 15.9059 24.4908C15.625 24.9112 15.625 25.4963 15.625 26.6668C15.625 31.3808 15.625 33.7378 17.0895 35.2023C18.554 36.6668 20.9107 36.6668 25.6247 36.6668H27.2913C32.0053 36.6668 34.3623 36.6668 35.8268 35.2023C37.2913 33.7378 37.2913 31.3808 37.2913 26.6668V13.3335C37.2913 8.61946 37.2913 6.26243 35.8268 4.79796C34.3623 3.3335 32.0053 3.3335 27.2913 3.3335H25.6247C20.9107 3.3335 18.554 3.3335 17.0895 4.79796C15.625 6.26243 15.625 8.61945 15.625 13.3335Z" fill="#252429" />
                             </svg>
+                            
+                           
 
-                        </Link>
+                        </button>
                     </div>
 
 

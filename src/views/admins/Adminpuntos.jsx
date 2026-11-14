@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clienteAxios from "../../config/axios";
 import Swal from 'sweetalert2';
+import Puntos from '../../componentes/puntosEncuentro';
 
 export default function AdminPuntos() {
     const tabs = [
@@ -14,35 +15,16 @@ export default function AdminPuntos() {
         "Valoraciones",
     ];
 
-    const puntosGuardados = [
-        {
-            id: 1,
-            titulo: "Entrada Principal FCFM",
-            subtitulo: "Ciudad Universitaria | 8:00 - 21:00",
-        },
-        {
-            id: 2,
-            titulo: "Arriba de la estación",
-            subtitulo: "Estacion Universidad | 8:00 - 21:00",
-        },
-        {
-            id: 3,
-            titulo: "Cafeteria Quimicás",
-            subtitulo: "Ciudad Universitaria | 8:00 - 21:00",
-        },
-    ];
-
-
-
     const [punto, guardarPunto] = useState({
         lugar: '',
         zona: '',
         descripcionZona: '',
         horario: '',
         url_ubicacion: '',
-
-
     });
+
+    // Lista de puntos que vienen del backend (es un arreglo)
+    const [puntos, guardarPuntos] = useState([]);
 
     // Leer datos del formulario
     const actualizarState = e => {
@@ -67,6 +49,8 @@ export default function AdminPuntos() {
                 icon: "success"
             });
 
+            // Recargar la lista para que aparezca el punto nuevo
+            consultarAPI();
 
         } catch (error) {
 
@@ -81,6 +65,121 @@ export default function AdminPuntos() {
         }
     };
 
+    const consultarAPI = async () => {
+        try {
+            const puntosConsulta = await clienteAxios.get('/admin/puntos');
+            console.log(puntosConsulta.data);
+            guardarPuntos(puntosConsulta.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        consultarAPI();
+    }, [])
+
+    // Desactivar un punto: recibe el id del punto al que se le dio clic
+    const desactivarPunto = async id => {
+        try {
+
+            const res = await clienteAxios.put(`/admin/puntos/${id}/desactivar`);
+
+            Swal.fire({
+                title: "¡Desactivado!",
+                text: res.data.mensaje,
+                icon: "success"
+            });
+
+            consultarAPI();   // recargar la lista
+
+            return true;   // avisa al componente que sí se desactivó
+
+        } catch (error) {
+
+            console.log(error);
+
+            Swal.fire({
+                icon: 'error',
+                title: "Hubo un error",
+                text: 'Intente de nuevo'
+            });
+
+            return false;  // el botón se queda como estaba
+
+        }
+    };
+
+    // Activar un punto: recibe el id del punto al que se le dio clic
+    const activarPunto = async id => {
+        try {
+
+            const res = await clienteAxios.put(`/admin/puntos/${id}/activar`);
+
+            Swal.fire({
+                title: "¡Activado!",
+                text: res.data.mensaje,
+                icon: "success"
+            });
+
+            consultarAPI();   // recargar la lista
+
+            return true;   // avisa al componente que sí se activó
+
+        } catch (error) {
+
+            console.log(error);
+
+            Swal.fire({
+                icon: 'error',
+                title: "Hubo un error",
+                text: 'Intente de nuevo'
+            });
+
+            return false;  // el botón se queda como estaba
+
+        }
+    };
+
+
+    const eliminarPunto = async id => {
+
+        const confirmacion = await Swal.fire({
+            title: "¿Eliminar categoría?",
+            text: "Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar"
+        });
+
+        if (!confirmacion.isConfirmed) return;
+
+        try {
+
+            const res = await clienteAxios.delete(`/admin/puntos/${id}`);
+
+            Swal.fire({
+                title: "¡Eliminada!",
+                text: res.data.mensaje,
+                icon: "success"
+            });
+
+            consultarAPI();
+
+        } catch (error) {
+
+            console.log(error);
+
+            Swal.fire({
+                icon: 'error',
+                title: "Hubo un error",
+                text: 'Intente de nuevo'
+            });
+
+        }
+
+    };
 
     return (
         <div className="min-h-screen w-full bg-[#FCFBF0] px-6 py-8 md:px-12 font-sans text-[#4A4A4A]">
@@ -191,40 +290,17 @@ export default function AdminPuntos() {
                     <h2 className="text-2xl font-bold text-[#4A4A4A]">
                         Puntos ya creados
                     </h2>
-
-                    <div className="flex flex-col gap-4">
-                        {puntosGuardados.map((punto) => (
-                            <div
-                                key={punto.id}
-                                className="flex flex-col justify-between gap-4 rounded-[28px] bg-white px-7 py-5 shadow-[0_4px_16px_rgba(0,0,0,0.04)] sm:flex-row sm:items-center"
-                            >
-                                <div>
-                                    <h3 className="text-[15px] font-bold text-[#333333]">
-                                        {punto.titulo}
-                                    </h3>
-                                    <p className="mt-0.5 text-[12px] font-medium text-gray-400">
-                                        {punto.subtitulo}
-                                    </p>
-                                </div>
-
-                                <div className="flex shrink-0 items-center gap-2">
-                                    <button
-                                        type="button"
-                                        className="h-[34px] rounded-full bg-[#FCE570] px-5 text-[12px] font-bold text-[#434035] shadow-[0_2px_4px_rgba(0,0,0,0.06)] transition hover:brightness-95"
-                                    >
-                                        Desactivar
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        className="h-[34px] rounded-full bg-[#FF8083] px-5 text-[12px] font-bold text-white shadow-[0_2px_4px_rgba(0,0,0,0.06)] transition hover:brightness-95"
-                                    >
-                                        Eliminar
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                        <div className="flex flex-col gap-4">
+                            {puntos.map((p) => (
+                                <Puntos
+                                    key={p._id}
+                                    punto={p}
+                                    desactivarPunto={desactivarPunto}
+                                    activarPunto={activarPunto}
+                                    eliminarPunto={eliminarPunto}
+                                />
+                            ))}
+                        </div>
                 </div>
             </div>
         </div>

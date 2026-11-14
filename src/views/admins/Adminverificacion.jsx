@@ -1,4 +1,57 @@
+import React, { useState, useEffect } from 'react';
+import clienteAxios from "../../config/axios";
+import Swal from 'sweetalert2';
+import Verificaciones from '../../componentes/consultaVerificaciones';
+
 export default function VerificationAdmin() {
+
+    const [verificaciones, guardarVerificaciones] = useState([]);
+
+    const consultarAPI = async () => {
+        try {
+            const verificacionConsulta = await clienteAxios.get('/admin/mostrarVerificaciones');
+            console.log(verificacionConsulta.data);
+            guardarVerificaciones(verificacionConsulta.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        consultarAPI();
+    }, [])
+
+    // Cambiar el estado de la verificación de un usuario
+    // id:     el _id del usuario
+    // estado: 'aprobado' o 'rechazado'
+    const cambiarEstadoVerificacion = async (id, estado) => {
+        try {
+
+            const res = await clienteAxios.patch(`/admin/verificacionEstatus/${id}`, { estado });
+
+            Swal.fire({
+                title: "¡Listo!",
+                text: res.data.mensaje,
+                icon: "success"
+            });
+
+            // Recargar la lista: el usuario ya no está "pendiente", así que desaparece
+            consultarAPI();
+
+        } catch (error) {
+
+            console.log(error);
+
+            Swal.fire({
+                icon: 'error',
+                title: "Hubo un error",
+                // Si el backend manda un mensaje (ej. "Se debe completar la verificacion"), lo mostramos
+                text: error.response?.data?.mensaje || 'Intente de nuevo'
+            });
+
+        }
+    };
+
     return (
         <>
 
@@ -6,8 +59,7 @@ export default function VerificationAdmin() {
                 className="
                     w-full
                     pb-12
-                    font-sans
-                "
+                    font-sans"
             >
 
                 <div className="mb-8 px-5">
@@ -16,14 +68,12 @@ export default function VerificationAdmin() {
                         className="
                             text-3xl
                             font-extrabold
-                            text-[#1f1f22]
-                        "
+                            text-[#1f1f22]"
                     >
                         Administración de UniMarket
                     </h1>
 
                 </div>
-
 
                 <div
                     className="
@@ -31,8 +81,7 @@ export default function VerificationAdmin() {
                         min-h-[430px]
                         bg-[#FFFDF8]
                         px-7
-                        py-7
-                    "
+                        py-7"
                 >
 
                     <div
@@ -40,16 +89,14 @@ export default function VerificationAdmin() {
                             mb-8
                             flex
                             items-center
-                            justify-between
-                        "
+                            justify-between"
                     >
 
                         <h2
                             className="
                                 text-2xl
                                 font-extrabold
-                                text-[#252429]
-                            "
+                                text-[#252429]"
                         >
                             Verificaciones pendientes
                         </h2>
@@ -72,8 +119,7 @@ export default function VerificationAdmin() {
                                     text-gray-400
                                     shadow-[0_2px_5px_rgba(0,0,0,0.20)]
                                     outline-none
-                                    focus:border-gray-300
-                                "
+                                    focus:border-gray-300"
                             >
 
                                 <option>FILTRO</option>
@@ -90,8 +136,7 @@ export default function VerificationAdmin() {
                                     absolute
                                     right-4
                                     top-1/2
-                                    -translate-y-1/2
-                                "
+                                    -translate-y-1/2"
                             >
 
                                 <svg
@@ -111,8 +156,7 @@ export default function VerificationAdmin() {
                                             C4.2016 6.66675 3.99893 7.32586 4.33327 7.67064
                                             L9.69135 13.196
                                             C9.86894 13.3792 10.1311 13.3792 10.3087 13.196
-                                            Z
-                                        "
+                                            Z"
                                         fill="#252429"
                                     />
 
@@ -124,244 +168,17 @@ export default function VerificationAdmin() {
 
                     </div>
 
+                    {
+                        verificaciones.map(usuario => (
 
-                    <div
-                        className="
-                            mb-6
-                            flex
-                            min-h-[72px]
-                            items-center
-                            justify-between
-                            bg-white
-                            px-5
-                            py-3
-                            shadow-[0_3px_3px_rgba(0,0,0,0.25)]
-                        "
-                    >
+                            <Verificaciones
+                                key={usuario._id}
+                                usuario={usuario}
+                                cambiarEstadoVerificacion={cambiarEstadoVerificacion}
+                            />
 
-                        <div>
-
-                            <h3
-                                className="
-                                    text-base
-                                    font-extrabold
-                                    text-[#252429]
-                                "
-                            >
-                                Carlos Méndez
-                            </h3>
-
-
-                            <p
-                                className="
-                                    text-xs
-                                    font-semibold
-                                    text-gray-400
-                                "
-                            >
-                                UANL FCFM Constancia de estudio: Constancia.pdf
-                            </p>
-
-
-                            <div
-                                className="
-                                    mt-1
-                                    flex
-                                    gap-8
-                                    text-xs
-                                    font-bold
-                                    text-[#252429]
-                                "
-                            >
-
-                                <span>
-                                    Enviado: 4 sep 2026
-                                </span>
-
-                                <span>
-                                    10:30 A.M.
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <div
-                            className="
-                                flex
-                                items-center
-                                gap-3
-                            "
-                        >
-
-                            <button
-                                className="
-                                    rounded-full
-                                    bg-[#FFFDF8]
-                                    px-6
-                                    py-2
-                                    text-xs
-                                    font-bold
-                                    shadow-[0_2px_4px_rgba(0,0,0,0.25)]
-                                    transition-transform
-                                    hover:scale-105
-                                "
-                            >
-                                Ver
-                            </button>
-
-
-                            <button
-                                className="
-                                    rounded-full
-                                    bg-[#FFE76B]
-                                    px-6
-                                    py-2
-                                    text-xs
-                                    font-bold
-                                    shadow-[0_2px_4px_rgba(0,0,0,0.25)]
-                                    transition-transform
-                                    hover:scale-105
-                                "
-                            >
-                                Aprobar
-                            </button>
-
-
-                            <button
-                                className="rounded-full
-                                    bg-[#FF747B]
-                                    px-6
-                                    py-2
-                                    text-xs
-                                    font-bold
-                                    shadow-[0_2px_4px_rgba(0,0,0,0.25)]
-                                    transition-transform
-                                    hover:scale-105
-                                "
-                            >
-                                Rechazar
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        className="
-                            mb-6
-                            flex
-                            min-h-[72px]
-                            items-center
-                            justify-between
-                            bg-white
-                            px-5
-                            py-3
-                            shadow-[0_3px_3px_rgba(0,0,0,0.25)]
-                        "
-                    >
-
-                        <div>
-
-                            <h3 className="text-base font-extrabold text-[#252429]">
-                                Alan Salas
-                            </h3>
-
-                            <p className="text-xs font-semibold text-gray-400">
-                                UANL FIME Constancia de estudio: ConstanciaAlan.pdf
-                            </p>
-
-                            <div className="mt-1 flex gap-8 text-xs font-bold">
-
-                                <span>
-                                    Enviado: 4 sep 2026
-                                </span>
-
-                                <span>
-                                    10:30 A.M.
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <div className="flex items-center gap-3">
-
-                            <button className="rounded-full bg-[#FFFDF8] px-6 py-2 text-xs font-bold shadow-[0_2px_4px_rgba(0,0,0,0.25)]">
-                                Ver
-                            </button>
-
-                            <button className="rounded-full bg-[#FFE76B] px-6 py-2 text-xs font-bold shadow-[0_2px_4px_rgba(0,0,0,0.25)]">
-                                Aprobar
-                            </button>
-
-                            <button className="rounded-full bg-[#FF747B] px-6 py-2 text-xs font-bold shadow-[0_2px_4px_rgba(0,0,0,0.25)]">
-                                Rechazar
-                            </button>
-
-                        </div>
-
-                    </div>
-
-
-                    <div
-                        className="
-                            flex
-                            min-h-[72px]
-                            items-center
-                            justify-between
-                            bg-white
-                            px-5
-                            py-3
-                            shadow-[0_3px_3px_rgba(0,0,0,0.25)]
-                        "
-                    >
-
-                        <div>
-
-                            <h3 className="text-base font-extrabold text-[#252429]">
-                                Alejandro Acosta
-                            </h3>
-
-                            <p className="text-xs font-semibold text-gray-400">
-                                UANL FCFM Constancia de estudio: Constancia_Alejandro.pdf
-                            </p>
-
-                            <div className="mt-1 flex gap-8 text-xs font-bold">
-
-                                <span>
-                                    Enviado: 4 sep 2026
-                                </span>
-
-                                <span>
-                                    10:30 A.M.
-                                </span>
-
-                            </div>
-
-                        </div>
-
-
-                        <div className="flex items-center gap-3">
-
-                            <button className="rounded-full bg-[#FFFDF8] px-6 py-2 text-xs font-bold shadow-[0_2px_4px_rgba(0,0,0,0.25)]">
-                                Ver
-                            </button>
-
-                            <button className="rounded-full bg-[#FFE76B] px-6 py-2 text-xs font-bold shadow-[0_2px_4px_rgba(0,0,0,0.25)]">
-                                Aprobar
-                            </button>
-
-                            <button className="rounded-full bg-[#FF747B] px-6 py-2 text-xs font-bold shadow-[0_2px_4px_rgba(0,0,0,0.25)]">
-                                Rechazar
-                            </button>
-
-                        </div>
-
-                    </div>
+                        ))
+                    }
 
                 </div>
 

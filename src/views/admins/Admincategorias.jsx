@@ -1,12 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clienteAxios from "../../config/axios";
 import Swal from 'sweetalert2';
+import Categroias from '../../componentes/categorias';
 
 export default function CategoriasAdmin() {
 
     const [categoria, guardarCategoria] = useState({
         nombre_categoria: ''
     });
+
+    // Lista de categorías que vienen del backend
+    const [categorias, guardarCategorias] = useState([]);
 
     // Leer datos del formulario
     const actualizarState = e => {
@@ -16,11 +20,23 @@ export default function CategoriasAdmin() {
         });
     };
 
+    const consultarAPI = async () => {
+        try {
+            const categoriaConsulta = await clienteAxios.get('/admin/categorias/mostrar');
+            console.log(categoriaConsulta.data);
+            guardarCategorias(categoriaConsulta.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        consultarAPI();
+    }, [])
+
     // Añadir una categoría nueva
     const agregarCategoria = async e => {
-
         e.preventDefault();
-
         try {
 
             const res = await clienteAxios.post('/admin/categorias', categoria);
@@ -33,7 +49,79 @@ export default function CategoriasAdmin() {
                 icon: "success"
             });
 
-           
+            // Limpiar el input y recargar la lista
+            guardarCategoria({ nombre_categoria: '' });
+            consultarAPI();
+
+        } catch (error) {
+
+            console.log(error);
+
+            Swal.fire({
+                icon: 'error',
+                title: "Hubo un error",
+                text: 'Intente de nuevo'
+            });
+
+        }
+    };
+
+    // Actualizar una categoría (se llama desde el componente Categroias)
+    const actualizarCategoria = async (id, nombre_categoria) => {
+        try {
+
+            const res = await clienteAxios.put(`/admin/categorias/${id}`, { nombre_categoria });
+
+            Swal.fire({
+                title: "¡Actualizada!",
+                text: res.data.mensaje,
+                icon: "success"
+            });
+
+            consultarAPI();
+
+            return true;   // avisa al componente que sí se actualizó
+
+        } catch (error) {
+
+            console.log(error);
+
+            Swal.fire({
+                icon: 'error',
+                title: "Hubo un error",
+                text: 'Intente de nuevo'
+            });
+
+            return false;  // el componente se queda en modo edición
+
+        }
+    };
+
+    // Eliminar una categoría (se llama desde el componente Categroias)
+    const eliminarCategoria = async id => {
+
+        const confirmacion = await Swal.fire({
+            title: "¿Eliminar categoría?",
+            text: "Esta acción no se puede deshacer",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sí, eliminar",
+            cancelButtonText: "Cancelar"
+        });
+
+        if (!confirmacion.isConfirmed) return;
+
+        try {
+
+            const res = await clienteAxios.delete(`/admin/categorias/${id}`);
+
+            Swal.fire({
+                title: "¡Eliminada!",
+                text: res.data.mensaje,
+                icon: "success"
+            });
+
+            consultarAPI();
 
         } catch (error) {
 
@@ -50,7 +138,7 @@ export default function CategoriasAdmin() {
 
     return (
         <>
-            <div className="min-h-screen w-full bg-[#FFFFED] px-8 pb-12 pt-8 md:px-12 font-sans">
+            <div className="min-h-screen w-full bg-[#FFFFED] px-8 pb-12 pt-8 md:px-12 font-sans ">
 
                 {/* TÍTULO GENERAL */}
                 <div className="mb-8">
@@ -62,22 +150,20 @@ export default function CategoriasAdmin() {
                 {/* CONTENIDO PRINCIPAL */}
                 <div
                     className="
-                        grid
-                        grid-cols-1
-                        gap-10
-                        xl:grid-cols-[0.8fr_1.2fr]
-                    "
+                    grid
+                    grid-cols-1
+                    gap-10
+                    xl:grid-cols-[0.8fr_1.2fr]"
                 >
 
                     {/* PANEL AGREGAR CATEGORÍA */}
                     <div
                         className="
-                            min-h-[500px]
-                            w-full
-                            bg-[#FFFDF8]
-                            px-8
-                            py-8
-                        "
+                        min-h-[500px]
+                        w-full
+                        bg-[#FFFDF8]
+                        px-8
+                        py-8"
                     >
 
                         <h2 className="text-[26px] font-extrabold text-[#252429]">
@@ -93,12 +179,11 @@ export default function CategoriasAdmin() {
                                 <label
                                     htmlFor="nombreCategoria"
                                     className="
-                                        mb-4
-                                        block
-                                        text-[16px]
-                                        font-extrabold
-                                        text-[#252429]
-                                    "
+                                    mb-4
+                                    block
+                                    text-[16px]
+                                    font-extrabold
+                                    text-[#252429] "
                                 >
                                     Nombre:
                                 </label>
@@ -110,18 +195,17 @@ export default function CategoriasAdmin() {
                                     value={categoria.nombre_categoria}
                                     required
                                     className="
-                                        h-[52px]
-                                        w-full
-                                        rounded-full
-                                        border
-                                        border-gray-100
-                                        bg-white
-                                        px-6
-                                        text-[14px]
-                                        text-[#252429]
-                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                        outline-none
-                                    "
+                                    h-[52px]
+                                    w-full
+                                     rounded-full
+                                    border
+                                    border-gray-100
+                                    bg-white
+                                    px-6
+                                    text-[14px]
+                                    text-[#252429]
+                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
+                                    outline-none"
                                     onChange={actualizarState}
                                 />
 
@@ -130,33 +214,31 @@ export default function CategoriasAdmin() {
                             {/* BOTÓN AGREGAR */}
                             <div
                                 className="
-                                    mt-12
-                                    flex
-                                    flex-wrap
-                                    items-center
-                                    justify-around
-                                    gap-5
-                                "
+                                mt-12
+                                flex
+                                flex-wrap
+                                items-center
+                                justify-around
+                                gap-5 "
                             >
 
                                 <button
                                     type="submit"
                                     className="
-                                        flex
-                                        h-[38px]
-                                        min-w-[130px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FAE568]
-                                        px-6
-                                        text-[13px]
-                                        font-extrabold
-                                        text-[#252429]
-                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                        transition
-                                        hover:brightness-95
-                                    "
+                                    flex
+                                     h-[38px]
+                                    min-w-[130px]
+                                    items-center
+                                    justify-center
+                                    rounded-full
+                                    bg-[#FAE568]
+                                    px-6
+                                    text-[13px]
+                                    font-extrabold
+                                    text-[#252429]
+                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
+                                    transition
+                                    hover:brightness-95"
                                 >
                                     Agregar
                                 </button>
@@ -170,25 +252,23 @@ export default function CategoriasAdmin() {
                     {/* PANEL LISTADO DE CATEGORÍAS */}
                     <div
                         className="
-                            min-h-[500px]
-                            w-full
-                            bg-[#FFFDF8]
-                            px-8
-                            py-8
-                        "
+                        min-h-[500px]
+                        w-full
+                        bg-[#FFFDF8]
+                        px-8
+                        py-8"
                     >
 
                         {/* ENCABEZADO */}
                         <div
                             className="
-                                mb-12
-                                flex
-                                flex-col
-                                gap-5
-                                md:flex-row
-                                md:items-center
-                                md:justify-between
-                            "
+                            mb-12
+                            flex
+                            flex-col
+                            gap-5
+                            md:flex-row
+                            md:items-center
+                            md:justify-between"
                         >
 
                             <h2 className="text-[26px] font-extrabold text-[#252429]">
@@ -202,318 +282,37 @@ export default function CategoriasAdmin() {
                                     type="text"
                                     placeholder="Buscar"
                                     className="
-                                        h-[43px]
-                                        w-full
-                                        rounded-full
-                                        border
-                                        border-gray-100
-                                        bg-white
-                                        px-5
-                                        text-[13px]
-                                        text-[#252429]
-                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                        outline-none
-                                        placeholder:text-[#A0A0A0]
-                                    "
+                                    h-[43px]
+                                    w-full
+                                    rounded-full
+                                    border
+                                    border-gray-100
+                                    bg-white
+                                    px-5
+                                    text-[13px]
+                                    text-[#252429]
+                                     shadow-[0_3px_6px_rgba(0,0,0,0.20)]
+                                    outline-none
+                                    placeholder:text-[#A0A0A0]"
                                 />
 
                             </div>
 
                         </div>
 
-                        {/* CATEGORÍA 1 */}
-                        <div
-                            className="
-                                mb-6
-                                grid
-                                grid-cols-[1fr_auto_auto]
-                                items-center
-                                gap-4
-                            "
-                        >
+                        {/* LISTADO DE CATEGORÍAS */}
+                        {
+                            categorias.map(cat => (
 
-                            <p className="text-[18px] font-extrabold text-[#252429]">
-                                Electrónica
-                            </p>
+                                <Categroias
+                                    key={cat._id}
+                                    categoria={cat}
+                                    actualizarCategoria={actualizarCategoria}
+                                    eliminarCategoria={eliminarCategoria}
+                                />
 
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FAE568]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Editar
-                            </button>
-
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FF797C]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Eliminar
-                            </button>
-
-                        </div>
-
-                        {/* CATEGORÍA 2 */}
-                        <div
-                            className="
-                                mb-6
-                                grid
-                                grid-cols-[1fr_auto_auto]
-                                items-center
-                                gap-4
-                            "
-                        >
-
-                            <p className="text-[18px] font-extrabold text-[#252429]">
-                                Realidad Virtual
-                            </p>
-
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FAE568]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Editar
-                            </button>
-
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FF797C]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Eliminar
-                            </button>
-
-                        </div>
-
-                        {/* CATEGORÍA 3 */}
-                        <div
-                            className="
-                                mb-6
-                                grid
-                                grid-cols-[1fr_auto_auto]
-                                items-center
-                                gap-4
-                            "
-                        >
-
-                            <p className="text-[18px] font-extrabold text-[#252429]">
-                                Libros
-                            </p>
-
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FAE568]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Editar
-                            </button>
-
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FF797C]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Eliminar
-                            </button>
-
-                        </div>
-
-                        {/* CATEGORÍA 4 */}
-                        <div
-                            className="
-                                mb-6
-                                grid
-                                grid-cols-[1fr_auto_auto]
-                                items-center
-                                gap-4
-                            "
-                        >
-
-                            <p className="text-[18px] font-extrabold text-[#252429]">
-                                Herramientas
-                            </p>
-
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FAE568]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Editar
-                            </button>
-
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FF797C]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Eliminar
-                            </button>
-
-                        </div>
-
-                        {/* CATEGORÍA 5 */}
-                        <div
-                            className="
-                                grid
-                                grid-cols-[1fr_auto_auto]
-                                items-center
-                                gap-4
-                            "
-                        >
-
-                            <p className="text-[18px] font-extrabold text-[#252429]">
-                                Multimedia
-                            </p>
-
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FAE568]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Editar
-                            </button>
-
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FF797C]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-[#252429]
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Eliminar
-                            </button>
-
-                        </div>
+                            ))
+                        }
 
                     </div>
 

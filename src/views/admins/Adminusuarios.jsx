@@ -1,4 +1,54 @@
+import React, { useState, useEffect } from 'react';
+import clienteAxios from "../../config/axios";
+import Swal from 'sweetalert2';
+import UsuariosVerificaciones from '../../componentes/consultaUsuariosVerificados';
+
 export default function UsuariosAdmin() {
+
+    const [usuariosVerificados, guardarUsuariosVerificados] = useState([]);
+
+    const consultarAPI = async () => {
+        try {
+            const usuariosVerificadosConsulta = await clienteAxios.get('/admin/mostrarTodasVerificaciones');
+            console.log(usuariosVerificadosConsulta.data);
+            guardarUsuariosVerificados(usuariosVerificadosConsulta.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    // Suspender un usuario: solo se manda el id en la URL, no hace falta body
+    const actualizarUsuarioStatus = async (id) => {
+        try {
+
+            const res = await clienteAxios.put(`/admin/usuarios/${id}/suspender`);
+
+            Swal.fire({
+                title: "¡Suspendido!",
+                text: res.data.mensaje,
+                icon: "success"
+            });
+
+            consultarAPI();   // recargar la lista para ver el nuevo status
+
+        } catch (error) {
+
+            console.log(error);
+
+            Swal.fire({
+                icon: 'error',
+                title: "Hubo un error",
+                // Si el backend manda un mensaje (ej. "El usuario ya esta suspendido"), lo mostramos
+                text: error.response?.data?.mensaje || 'Intente de nuevo'
+            });
+
+        }
+    };
+
+    useEffect(() => {
+        consultarAPI();
+    }, [])
+
     return (
         <>
             <div className="min-h-screen w-full bg-[#FFFFED] px-8 pb-12 pt-8 md:px-12">
@@ -10,10 +60,6 @@ export default function UsuariosAdmin() {
                     </h1>
                 </div>
 
-
-                {/* =====================================================
-                    TABLA DE USUARIOS
-                ====================================================== */}
                 <div className="w-full overflow-x-auto">
 
                     <div className="min-w-[1000px] w-full">
@@ -49,330 +95,19 @@ export default function UsuariosAdmin() {
                             <span></span>
                         </div>
 
+                        {/* FILAS DE USUARIOS (dentro del mismo contenedor que el encabezado
+                            para que las columnas queden alineadas) */}
+                        {
+                            usuariosVerificados.map(verificado => (
 
-                        {/* =================================================
-                            USUARIO 1
-                        ================================================== */}
-                        <div
-                            className="
-                                mt-1
-                                grid
-                                min-h-[92px]
-                                grid-cols-[1.35fr_1fr_1.2fr_0.85fr_0.8fr]
-                                items-center
-                                bg-[#FFFDF8]
-                                px-4
-                                text-[#252429]
-                            "
-                        >
+                                <UsuariosVerificaciones
+                                    key={verificado._id}
+                                    verificado={verificado}
+                                    actualizarUsuarioStatus={actualizarUsuarioStatus}
+                                />
 
-                            {/* USUARIO */}
-                            <div>
-                                <p className="text-[19px] font-extrabold">
-                                    Carlos Méndez
-                                </p>
-
-                                <p className="mt-1 text-[13px] font-semibold text-[#929292] underline">
-                                    CarlosM23@uanl.edu.mx
-                                </p>
-                            </div>
-
-
-                            {/* ROL */}
-                            <p className="text-[18px] font-bold text-[#929292]">
-                                Estudiante
-                            </p>
-
-
-                            {/* VERIFICACIÓN */}
-                            <div
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#39A867]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-black
-                                    shadow-[0_3px_5px_rgba(0,0,0,0.18)]
-                                "
-                            >
-                                Verificado
-                            </div>
-
-
-                            {/* CUENTA */}
-                            <p className="text-[18px] font-extrabold text-[#929292]">
-                                Activa
-                            </p>
-
-
-                            {/* BOTÓN */}
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FF797C]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-black
-                                    shadow-[0_3px_5px_rgba(0,0,0,0.18)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Suspender
-                            </button>
-
-                        </div>
-
-
-                        {/* =================================================
-                            USUARIO 2
-                        ================================================== */}
-                        <div
-                            className="
-                                mt-4
-                                grid
-                                min-h-[92px]
-                                grid-cols-[1.35fr_1fr_1.2fr_0.85fr_0.8fr]
-                                items-center
-                                bg-[#FFFDF8]
-                                px-4
-                                text-[#252429]
-                            "
-                        >
-
-                            <div>
-                                <p className="text-[19px] font-extrabold">
-                                    Alan Salas
-                                </p>
-
-                                <p className="mt-1 text-[13px] font-semibold text-[#929292] underline">
-                                    Lalanzon123@gmail.com
-                                </p>
-                            </div>
-
-
-                            <p className="text-[18px] font-bold text-[#929292]">
-                                Estudiante
-                            </p>
-
-
-                            <div
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#39A867]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-black
-                                    shadow-[0_3px_5px_rgba(0,0,0,0.18)]
-                                "
-                            >
-                                Verificado
-                            </div>
-
-
-                            <p className="text-[18px] font-extrabold text-[#929292]">
-                                Activa
-                            </p>
-
-
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FF797C]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-black
-                                    shadow-[0_3px_5px_rgba(0,0,0,0.18)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Suspender
-                            </button>
-
-                        </div>
-
-
-                        {/* =================================================
-                            USUARIO 3
-                        ================================================== */}
-                        <div
-                            className="
-                                mt-4
-                                grid
-                                min-h-[92px]
-                                grid-cols-[1.35fr_1fr_1.2fr_0.85fr_0.8fr]
-                                items-center
-                                bg-[#FFFDF8]
-                                px-4
-                                text-[#252429]
-                            "
-                        >
-
-                            <div>
-                                <p className="text-[19px] font-extrabold">
-                                    Alejandro Acosta
-                                </p>
-
-                                <p className="mt-1 text-[13px] font-semibold text-[#929292] underline">
-                                    Alejandro.AB@uanl.edu.mx
-                                </p>
-                            </div>
-
-
-                            <p className="text-[18px] font-bold text-[#929292]">
-                                Estudiante
-                            </p>
-
-
-                            <div
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FAE568]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-black
-                                    shadow-[0_3px_5px_rgba(0,0,0,0.18)]
-                                "
-                            >
-                                Pendiente
-                            </div>
-
-
-                            <p className="text-[18px] font-extrabold text-[#929292]">
-                                Activa
-                            </p>
-
-
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FF797C]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-black
-                                    shadow-[0_3px_5px_rgba(0,0,0,0.18)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Suspender
-                            </button>
-
-                        </div>
-
-
-                        {/* =================================================
-                            USUARIO 4
-                        ================================================== */}
-                        <div
-                            className="
-                                mt-4
-                                grid
-                                min-h-[92px]
-                                grid-cols-[1.35fr_1fr_1.2fr_0.85fr_0.8fr]
-                                items-center
-                                bg-[#FFFDF8]
-                                px-4
-                                text-[#252429]
-                            "
-                        >
-
-                            <div>
-                                <p className="text-[19px] font-extrabold">
-                                    Sofia Blanco
-                                </p>
-
-                                <p className="mt-1 text-[13px] font-semibold text-[#929292] underline">
-                                    SoafiaV04@gmail.com
-                                </p>
-                            </div>
-
-
-                            <p className="text-[18px] font-bold text-[#929292]">
-                                Estudiante
-                            </p>
-
-
-                            <div
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#39A867]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-black
-                                    shadow-[0_3px_5px_rgba(0,0,0,0.18)]
-                                "
-                            >
-                                Verificado
-                            </div>
-
-
-                            <p className="text-[18px] font-extrabold text-[#929292]">
-                                Activa
-                            </p>
-
-
-                            <button
-                                type="button"
-                                className="
-                                    flex
-                                    h-[38px]
-                                    w-[125px]
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[#FF797C]
-                                    text-[13px]
-                                    font-extrabold
-                                    text-black
-                                    shadow-[0_3px_5px_rgba(0,0,0,0.18)]
-                                    transition
-                                    hover:brightness-95
-                                "
-                            >
-                                Suspender
-                            </button>
-
-                        </div>
+                            ))
+                        }
 
                     </div>
 

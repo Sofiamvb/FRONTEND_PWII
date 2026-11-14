@@ -1,4 +1,53 @@
+import React, { useState, useEffect } from 'react';
+import clienteAxios from "../../config/axios";
+import Swal from 'sweetalert2';
+import AdminProductosConsulta from '../../componentes/adminProductos';
+
 export default function AdminProductos() {
+
+    const [adminProductos, guardarAdminProductos] = useState([]);
+
+    const consultarAPI = async () => {
+        try {
+            const adminProductosConsulta = await clienteAxios.get('/admin/productos');
+            console.log(adminProductosConsulta.data);
+            guardarAdminProductos(adminProductosConsulta.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+     const actualizarAprobacionProducto= async (id) => {
+        try {
+
+            const res = await clienteAxios.put(`/admin/productos/${id}/rechazar`);
+
+            Swal.fire({
+                title: "¡Rechazado!",
+                text: res.data.mensaje,
+                icon: "success"
+            });
+
+            consultarAPI();   // recargar la lista para ver el nuevo status
+
+        } catch (error) {
+
+            console.log(error);
+
+            Swal.fire({
+                icon: 'error',
+                title: "Hubo un error",
+                // Si el backend manda un mensaje (ej. "El usuario ya esta suspendido"), lo mostramos
+                text: error.response?.data?.mensaje || 'Intente de nuevo'
+            });
+
+        }
+    };
+
+    useEffect(() => {
+        consultarAPI();
+    }, [])
+
     return (
         <>
             <div className="min-h-screen w-full bg-[#FFFFED] px-8 pb-12 pt-8 md:px-12 font-sans">
@@ -10,10 +59,6 @@ export default function AdminProductos() {
                     </h1>
                 </div>
 
-
-                {/* =====================================================
-                    CONTENEDOR PRINCIPAL
-                ====================================================== */}
                 <div
                     className="
                         w-full
@@ -22,10 +67,6 @@ export default function AdminProductos() {
                         shadow-[0_3px_6px_rgba(0,0,0,0.15)]
                     "
                 >
-
-                    {/* =================================================
-                        ENCABEZADO DE PRODUCTOS
-                    ================================================== */}
                     <div
                         className="
                             flex
@@ -41,11 +82,9 @@ export default function AdminProductos() {
                             md:justify-between
                         "
                     >
-
                         <h2 className="text-[27px] font-extrabold text-[#252429]">
                             Productos Registrados
                         </h2>
-
 
                         {/* FILTRO */}
                         <div className="w-full md:w-[300px]">
@@ -73,10 +112,6 @@ export default function AdminProductos() {
 
                     </div>
 
-
-                    {/* =================================================
-                        TABLA
-                    ================================================== */}
                     <div className="w-full overflow-x-auto">
 
                         <div className="min-w-[1100px] w-full">
@@ -118,768 +153,19 @@ export default function AdminProductos() {
                                 </span>
                             </div>
 
-
-                            {/* =================================================
-                                PRODUCTO 1
-                            ================================================== */}
-                            <div
-                                className="
-                                    grid
-                                    min-h-[82px]
-                                    grid-cols-[2.1fr_1.1fr_0.8fr_1.3fr_1.35fr_1.8fr]
-                                    items-center
-                                    border-b
-                                    border-[#D9D9D3]
-                                    px-7
-                                    text-[#252429]
-                                "
-                            >
-
-                                {/* PRODUCTO */}
-                                <div className="flex items-center gap-4">
-
-                                    <div
-                                        className="
-                                            flex
-                                            h-[55px]
-                                            w-[55px]
-                                            shrink-0
-                                            items-center
-                                            justify-center
-                                            overflow-hidden
-                                            rounded-full
-                                            bg-[#FAE568]
-                                        "
-                                    >
-                                        <img
-                                            src="/img/microcontrolador.png"
-                                            alt="Microcontrolador"
-                                            className="h-[48px] w-[48px] object-contain"
-                                        />
-                                    </div>
-
-
-                                    <div>
-
-                                        <p className="text-[14px] font-extrabold">
-                                            Microcontrolador
-                                        </p>
-
-                                        <p className="mt-1 text-[11px] font-medium text-[#999999]">
-                                            Estacion Universidad - Usado
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-
-                                {/* ESTUDIANTE */}
-                                <p className="text-[13px] font-medium">
-                                    Mariana Lopez
-                                </p>
-
-
-                                {/* PRECIO */}
-                                <p className="text-[13px] font-medium">
-                                    $500
-                                </p>
-
-
-                                {/* APROBACIÓN */}
-                                <div
-                                    className="
-                                        flex
-                                        h-[31px]
-                                        w-[110px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#DDF3E8]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Aprobado
-                                </div>
-
-
-                                {/* DISPONIBILIDAD */}
-                                <div
-                                    className="
-                                        flex
-                                        h-[31px]
-                                        w-[115px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#DDF3E8]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Disponible
-                                </div>
-
-
-                                {/* ACCIONES */}
-                                <div className="flex items-center gap-3">
-
-                                    <button
-                                        type="button"
-                                        className="
-                                            flex
-                                            h-[31px]
-                                            w-[90px]
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            bg-[#FAE568]
-                                            text-[12px]
-                                            font-medium
-                                            text-[#252429]
-                                            shadow-[0_2px_5px_rgba(0,0,0,0.18)]
-                                            transition
-                                            hover:brightness-95
-                                        "
-                                    >
-                                        Disponible
-                                    </button>
-
-
-                                    <button
-                                        type="button"
-                                        className="
-                                            flex
-                                            h-[31px]
-                                            w-[86px]
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            bg-[#FF797C]
-                                            text-[12px]
-                                            font-medium
-                                            text-[#252429]
-                                            shadow-[0_2px_5px_rgba(0,0,0,0.18)]
-                                            transition
-                                            hover:brightness-95
-                                        "
-                                    >
-                                        Rechazar
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-
-                            {/* =================================================
-                                PRODUCTO 2
-                            ================================================== */}
-                            <div
-                                className="
-                                    grid
-                                    min-h-[82px]
-                                    grid-cols-[2.1fr_1.1fr_0.8fr_1.3fr_1.35fr_1.8fr]
-                                    items-center
-                                    border-b
-                                    border-[#D9D9D3]
-                                    px-7
-                                    text-[#252429]
-                                "
-                            >
-
-                                <div className="flex items-center gap-4">
-
-                                    <div
-                                        className="
-                                            flex
-                                            h-[55px]
-                                            w-[55px]
-                                            shrink-0
-                                            items-center
-                                            justify-center
-                                            overflow-hidden
-                                            rounded-full
-                                            bg-[#83CBFC]
-                                        "
-                                    >
-                                        <img
-                                            src="/img/meta_quest.png"
-                                            alt="Visor de RV"
-                                            className="h-[50px] w-[50px] object-contain"
-                                        />
-                                    </div>
-
-
-                                    <div>
-
-                                        <p className="text-[14px] font-extrabold">
-                                            Visor de RV
-                                        </p>
-
-                                        <p className="mt-1 text-[11px] font-medium text-[#999999]">
-                                            Ciudad Universitaria - Usado
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-
-                                <p className="text-[13px] font-medium">
-                                    Alan Salas
-                                </p>
-
-
-                                <p className="text-[13px] font-medium">
-                                    $800
-                                </p>
-
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[31px]
-                                        w-[110px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#DDF3E8]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Aprobado
-                                </div>
-
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[31px]
-                                        w-[115px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FFF0AD]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Reservado
-                                </div>
-
-
-                                <div className="flex items-center gap-3">
-
-                                    <button
-                                        type="button"
-                                        className="
-                                            flex
-                                            h-[31px]
-                                            w-[90px]
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            bg-[#FAE568]
-                                            text-[12px]
-                                            font-medium
-                                            text-[#252429]
-                                            shadow-[0_2px_5px_rgba(0,0,0,0.18)]
-                                            transition
-                                            hover:brightness-95
-                                        "
-                                    >
-                                        Disponible
-                                    </button>
-
-
-                                    <button
-                                        type="button"
-                                        className="
-                                            flex
-                                            h-[31px]
-                                            w-[86px]
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            bg-[#FF797C]
-                                            text-[12px]
-                                            font-medium
-                                            text-[#252429]
-                                            shadow-[0_2px_5px_rgba(0,0,0,0.18)]
-                                            transition
-                                            hover:brightness-95
-                                        "
-                                    >
-                                        Rechazar
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-
-                            {/* =================================================
-                                PRODUCTO 3
-                            ================================================== */}
-                            <div
-                                className="
-                                    grid
-                                    min-h-[82px]
-                                    grid-cols-[2.1fr_1.1fr_0.8fr_1.3fr_1.35fr_1.8fr]
-                                    items-center
-                                    border-b
-                                    border-[#D9D9D3]
-                                    px-7
-                                    text-[#252429]
-                                "
-                            >
-
-                                <div className="flex items-center gap-4">
-
-                                    <div
-                                        className="
-                                            flex
-                                            h-[55px]
-                                            w-[55px]
-                                            shrink-0
-                                            items-center
-                                            justify-center
-                                            overflow-hidden
-                                            rounded-full
-                                            bg-[#FAE568]
-                                        "
-                                    >
-                                        <img
-                                            src="/img/Calculadora.png"
-                                            alt="Calculadora Científica"
-                                            className="h-[48px] w-[48px] object-contain"
-                                        />
-                                    </div>
-
-
-                                    <div>
-
-                                        <p className="text-[14px] font-extrabold">
-                                            Calculadora Científica
-                                        </p>
-
-                                        <p className="mt-1 text-[11px] font-medium text-[#999999]">
-                                            Cafeteria FOD - Usado
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-
-                                <p className="text-[13px] font-medium">
-                                    Sofia Blanco
-                                </p>
-
-
-                                <p className="text-[13px] font-medium">
-                                    $650
-                                </p>
-
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[31px]
-                                        w-[110px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#DDF3E8]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Aprobado
-                                </div>
-
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[31px]
-                                        w-[115px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#F9DCDD]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    No disponible
-                                </div>
-
-
-                                <div className="flex items-center gap-3">
-
-                                    <button
-                                        type="button"
-                                        className="
-                                            flex
-                                            h-[31px]
-                                            w-[90px]
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            bg-[#FAE568]
-                                            text-[12px]
-                                            font-medium
-                                            text-[#252429]
-                                            shadow-[0_2px_5px_rgba(0,0,0,0.18)]
-                                            transition
-                                            hover:brightness-95
-                                        "
-                                    >
-                                        Disponible
-                                    </button>
-
-
-                                    <button
-                                        type="button"
-                                        className="
-                                            flex
-                                            h-[31px]
-                                            w-[86px]
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            bg-[#FF797C]
-                                            text-[12px]
-                                            font-medium
-                                            text-[#252429]
-                                            shadow-[0_2px_5px_rgba(0,0,0,0.18)]
-                                            transition
-                                            hover:brightness-95
-                                        "
-                                    >
-                                        Rechazar
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-
-                            {/* =================================================
-                                PRODUCTO 4
-                            ================================================== */}
-                            <div
-                                className="
-                                    grid
-                                    min-h-[82px]
-                                    grid-cols-[2.1fr_1.1fr_0.8fr_1.3fr_1.35fr_1.8fr]
-                                    items-center
-                                    border-b
-                                    border-[#D9D9D3]
-                                    px-7
-                                    text-[#252429]
-                                "
-                            >
-
-                                <div className="flex items-center gap-4">
-
-                                    {/* TABLETA GRÁFICA */}
-                                    <div
-                                        className="
-                                            relative
-                                            flex
-                                            h-[55px]
-                                            w-[55px]
-                                            shrink-0
-                                            items-center
-                                            justify-center
-                                            overflow-hidden
-                                            rounded-full
-                                            bg-[#83CBFC]
-                                        "
-                                    >
-                                        <div
-                                            className="
-                                                h-[27px]
-                                                w-[40px]
-                                                -rotate-[18deg]
-                                                rounded-[3px]
-                                                bg-[#252429]
-                                                shadow-md
-                                            "
-                                        >
-                                            <div className="ml-1 mt-1 h-[1px] w-[29px] bg-[#55545A]" />
-                                        </div>
-                                    </div>
-
-
-                                    <div>
-
-                                        <p className="text-[14px] font-extrabold">
-                                            Tableta Gráfica
-                                        </p>
-
-                                        <p className="mt-1 text-[11px] font-medium text-[#999999]">
-                                            Cafeteria FCC - Usado
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-
-                                <p className="text-[13px] font-medium">
-                                    Alejandro
-                                </p>
-
-
-                                <p className="text-[13px] font-medium">
-                                    $900
-                                </p>
-
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[31px]
-                                        w-[110px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FFF0AD]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Pendiente
-                                </div>
-
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[31px]
-                                        w-[115px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#DDF3E8]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Disponible
-                                </div>
-
-
-                                <div className="flex items-center gap-3">
-
-                                    <button
-                                        type="button"
-                                        className="
-                                            flex
-                                            h-[31px]
-                                            w-[90px]
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            bg-[#FAE568]
-                                            text-[12px]
-                                            font-medium
-                                            text-[#252429]
-                                            shadow-[0_2px_5px_rgba(0,0,0,0.18)]
-                                            transition
-                                            hover:brightness-95
-                                        "
-                                    >
-                                        Disponible
-                                    </button>
-
-
-                                    <button
-                                        type="button"
-                                        className="
-                                            flex
-                                            h-[31px]
-                                            w-[86px]
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            bg-[#FF797C]
-                                            text-[12px]
-                                            font-medium
-                                            text-[#252429]
-                                            shadow-[0_2px_5px_rgba(0,0,0,0.18)]
-                                            transition
-                                            hover:brightness-95
-                                        "
-                                    >
-                                        Rechazar
-                                    </button>
-
-                                </div>
-
-                            </div>
-
-
-                            {/* =================================================
-                                PRODUCTO 5
-                            ================================================== */}
-                            <div
-                                className="
-                                    grid
-                                    min-h-[82px]
-                                    grid-cols-[2.1fr_1.1fr_0.8fr_1.3fr_1.35fr_1.8fr]
-                                    items-center
-                                    px-7
-                                    text-[#252429]
-                                "
-                            >
-
-                                <div className="flex items-center gap-4">
-
-                                    <div
-                                        className="
-                                            flex
-                                            h-[55px]
-                                            w-[55px]
-                                            shrink-0
-                                            items-center
-                                            justify-center
-                                            overflow-hidden
-                                            rounded-full
-                                            bg-[#FAE568]
-                                        "
-                                    >
-                                        <img
-                                            src="/img/microcontrolador.png"
-                                            alt="Microcontrolador"
-                                            className="h-[48px] w-[48px] object-contain"
-                                        />
-                                    </div>
-
-
-                                    <div>
-
-                                        <p className="text-[14px] font-extrabold">
-                                            Microcontrolador
-                                        </p>
-
-                                        <p className="mt-1 text-[11px] font-medium text-[#999999]">
-                                            Cafeteria FCFM - Usado
-                                        </p>
-
-                                    </div>
-
-                                </div>
-
-
-                                <p className="text-[13px] font-medium">
-                                    Mariana López
-                                </p>
-
-
-                                <p className="text-[13px] font-medium">
-                                    $500
-                                </p>
-
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[31px]
-                                        w-[110px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#DDF3E8]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Aprobado
-                                </div>
-
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[31px]
-                                        w-[115px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#DDF3E8]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Disponible
-                                </div>
-
-
-                                <div className="flex items-center gap-3">
-
-                                    <button
-                                        type="button"
-                                        className="
-                                            flex
-                                            h-[31px]
-                                            w-[90px]
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            bg-[#FAE568]
-                                            text-[12px]
-                                            font-medium
-                                            text-[#252429]
-                                            shadow-[0_2px_5px_rgba(0,0,0,0.18)]
-                                            transition
-                                            hover:brightness-95
-                                        "
-                                    >
-                                        Disponible
-                                    </button>
-
-
-                                    <button
-                                        type="button"
-                                        className="
-                                            flex
-                                            h-[31px]
-                                            w-[86px]
-                                            items-center
-                                            justify-center
-                                            rounded-full
-                                            bg-[#FF797C]
-                                            text-[12px]
-                                            font-medium
-                                            text-[#252429]
-                                            shadow-[0_2px_5px_rgba(0,0,0,0.18)]
-                                            transition
-                                            hover:brightness-95
-                                        "
-                                    >
-                                        Rechazar
-                                    </button>
-
-                                </div>
-
-                            </div>
+                            {/* FILAS DE PRODUCTOS (dentro del mismo contenedor que el encabezado
+                                para que las columnas queden alineadas) */}
+                            {
+                                adminProductos.map(producto => (
+
+                                    <AdminProductosConsulta
+                                        key={producto._id}
+                                        producto={producto}
+                                        actualizarAprobacionProducto={actualizarAprobacionProducto}
+                                    />
+
+                                ))
+                            }
 
                         </div>
 

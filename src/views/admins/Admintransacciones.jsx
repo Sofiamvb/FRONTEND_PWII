@@ -1,4 +1,26 @@
+import React, { useState, useEffect } from 'react';
+import clienteAxios from "../../config/axios";
+import Swal from 'sweetalert2';
+import Transacciones from '../../componentes/transacciones';
+
 export default function AdminTransacciones() {
+
+    const [transacciones, guardarTransacciones] = useState([]);
+
+    const consultarAPI = async () => {
+        try {
+            const transaccionesConsulta = await clienteAxios.get('/admin/transacciones');
+            console.log(transaccionesConsulta.data);
+            guardarTransacciones(transaccionesConsulta.data);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        consultarAPI();
+    }, [])
+
     return (
         <>
             <div className="min-h-screen w-full bg-[#FFFFED] px-8 pb-12 pt-8 md:px-12 font-sans">
@@ -74,309 +96,17 @@ export default function AdminTransacciones() {
                                 </span>
                             </div>
 
+                            {
+                                transacciones.map(pedido => (
 
-                            <div
-                                className="
-                                    grid
-                                    min-h-[70px]
-                                    grid-cols-[1.15fr_1.2fr_1.05fr_1.2fr_0.8fr_1fr]
-                                    items-center
-                                    border-b
-                                    border-[#D9D9D3]
-                                    px-5
-                                    text-[#252429]
-                                "
-                            >
-                                <p className="text-[13px] font-medium">
-                                    t_demo_sale
-                                </p>
+                                    <Transacciones
+                                        key={pedido._id}
+                                        pedido={pedido}
+                                    />
 
-                                <p className="text-[13px] font-medium">
-                                    Arduino UNO
-                                </p>
+                                ))
+                            }
 
-                                <p className="text-[13px] font-medium">
-                                    Alan
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Mariana López
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    $500
-                                </p>
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[30px]
-                                        w-[115px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#DDF3E8]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Aprobado
-                                </div>
-                            </div>
-
-
-                            <div
-                                className="
-                                    grid
-                                    min-h-[70px]
-                                    grid-cols-[1.15fr_1.2fr_1.05fr_1.2fr_0.8fr_1fr]
-                                    items-center
-                                    border-b
-                                    border-[#D9D9D3]
-                                    px-5
-                                    text-[#252429]
-                                "
-                            >
-                                <p className="text-[13px] font-medium">
-                                    t_demo_sale1
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Protoboard
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Alejandro
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Mariana López
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    $600
-                                </p>
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[30px]
-                                        w-[115px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FAE568]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Pago Retenido
-                                </div>
-                            </div>
-
-
-                            <div
-                                className="
-                                    grid
-                                    min-h-[70px]
-                                    grid-cols-[1.15fr_1.2fr_1.05fr_1.2fr_0.8fr_1fr]
-                                    items-center
-                                    border-b
-                                    border-[#D9D9D3]
-                                    px-5
-                                    text-[#252429]
-                                "
-                            >
-                                <p className="text-[13px] font-medium">
-                                    t_demo_sale2
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Sensor Ultrasonico
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Sofia
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Mariana López
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    $900
-                                </p>
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[30px]
-                                        w-[115px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#DDF3E8]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Aprobado
-                                </div>
-                            </div>
-
-
-                            <div
-                                className="
-                                    grid
-                                    min-h-[70px]
-                                    grid-cols-[1.15fr_1.2fr_1.05fr_1.2fr_0.8fr_1fr]
-                                    items-center
-                                    border-b
-                                    border-[#D9D9D3]
-                                    px-5
-                                    text-[#252429]
-                                "
-                            >
-                                <p className="text-[13px] font-medium">
-                                    t_demo_sale3
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Arduino UNO
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Axl
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Mariana López
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    $350
-                                </p>
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[30px]
-                                        w-[115px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#DDF3E8]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Aprobado
-                                </div>
-                            </div>
-
-
-                            <div
-                                className="
-                                    grid
-                                    min-h-[70px]
-                                    grid-cols-[1.15fr_1.2fr_1.05fr_1.2fr_0.8fr_1fr]
-                                    items-center
-                                    border-b
-                                    border-[#D9D9D3]
-                                    px-5
-                                    text-[#252429]
-                                "
-                            >
-                                <p className="text-[13px] font-medium">
-                                    t_demo_sale4
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Arduino UNO
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Leonardo
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Mariana López
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    $400
-                                </p>
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[30px]
-                                        w-[115px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#DDF3E8]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Aprobado
-                                </div>
-                            </div>
-
-
-                            <div
-                                className="
-                                    grid
-                                    min-h-[70px]
-                                    grid-cols-[1.15fr_1.2fr_1.05fr_1.2fr_0.8fr_1fr]
-                                    items-center
-                                    px-5
-                                    text-[#252429]
-                                "
-                            >
-                                <p className="text-[13px] font-medium">
-                                    t_demo_sale5
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Protoboard
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Alan
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    Mariana López
-                                </p>
-
-                                <p className="text-[13px] font-medium">
-                                    $500
-                                </p>
-
-                                <div
-                                    className="
-                                        flex
-                                        h-[30px]
-                                        w-[115px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#DDF3E8]
-                                        text-[12px]
-                                        font-medium
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.15)]
-                                    "
-                                >
-                                    Aprobado
-                                </div>
-                            </div>
 
                         </div>
 

@@ -27,6 +27,7 @@ export default function Login() {
   const BuscarUsuario = e => {
 
     e.preventDefault();
+    console.log(usuario)
     // enviar peticion
     clienteAxios.post('/users/login', usuario)
       .then(res => {
@@ -36,6 +37,7 @@ export default function Login() {
 
       })
       .catch(error => {
+        console.log(error)
         console.log('Error interno al iniciar sesión')
         Swal.fire({
           icon: 'error',

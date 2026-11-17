@@ -20,6 +20,33 @@ export default function AdminProductos() {
      const actualizarAprobacionProducto= async (id) => {
         try {
 
+            const res = await clienteAxios.put(`admin/productos/${id}/aprobar`);
+
+            Swal.fire({
+                title: "Aporbado!",
+                text: res.data.mensaje,
+                icon: "success"
+            });
+
+            consultarAPI();   // recargar la lista para ver el nuevo status
+
+        } catch (error) {
+
+            console.log(error);
+
+            Swal.fire({
+                icon: 'error',
+                title: "Hubo un error",
+                // Si el backend manda un mensaje (ej. "El usuario ya esta suspendido"), lo mostramos
+                text: error.response?.data?.mensaje || 'Intente de nuevo'
+            });
+
+        }
+    };
+
+     const actualizarRechazarProducto= async (id) => {
+        try {
+
             const res = await clienteAxios.put(`/admin/productos/${id}/rechazar`);
 
             Swal.fire({
@@ -43,6 +70,7 @@ export default function AdminProductos() {
 
         }
     };
+
 
     useEffect(() => {
         consultarAPI();
@@ -162,6 +190,7 @@ export default function AdminProductos() {
                                         key={producto._id}
                                         producto={producto}
                                         actualizarAprobacionProducto={actualizarAprobacionProducto}
+                                        actualizarRechazarProducto={actualizarRechazarProducto}
                                     />
 
                                 ))

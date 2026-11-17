@@ -1,10 +1,22 @@
+export default function AdminProductosConsulta({producto, actualizarAprobacionProducto, actualizarRechazarProducto}) {
 
-export default function AdminProductosConsulta({producto, actualizarAprobacionProducto}) {
-
-    const { nombre_produ, condicion, usuario, precio } = producto;
+    const { nombre_produ, condicion, usuario, precio, status_aprobado, disponibilidad } = producto;
 
     // Datos del vendedor (el "|| {}" evita que truene si el usuario ya no existe)
     const { name, apellidoP } = usuario || {};
+
+    // Los valores pueden llegar como booleano (true/false) o como texto ("true"/"false"),
+    // por eso validamos ambos casos antes de decidir qué mostrar.
+    const estaAprobado = status_aprobado === true || status_aprobado === 'true';
+    const estaDisponible = disponibilidad === true || disponibilidad === 'true';
+
+    const textoAprobacion = estaAprobado ? 'Aprobado' : 'Rechazado';
+    const textoDisponibilidad = estaDisponible ? 'Disponible' : 'No disponible';
+
+    // Verde cuando es positivo, rojo cuando es negativo
+    const estiloAprobacion = estaAprobado? 'bg-[#DDF3E8] text-[#488669]': 'bg-[#FFE3E4] text-[#B4474A]';
+
+    const estiloDisponibilidad = estaDisponible? 'bg-[#DDF3E8] text-[#488669]': 'bg-[#FFE3E4] text-[#B4474A]';
 
     return (
     <div
@@ -66,36 +78,36 @@ export default function AdminProductosConsulta({producto, actualizarAprobacionPr
 
         {/* APROBACIÓN */}
         <div
-            className="
+            className={`
             flex
             h-[31px]
             w-[110px]
             items-center
             justify-center
             rounded-full
-            bg-[#DDF3E8]
             text-[12px]
             font-medium
-            shadow-[0_2px_5px_rgba(0,0,0,0.15)]"
+            shadow-[0_2px_5px_rgba(0,0,0,0.15)]
+            ${estiloAprobacion}`}
         >
-            Aprobado
+            {textoAprobacion}
         </div>
 
         {/* DISPONIBILIDAD */}
         <div
-            className="
+            className={`
             flex
             h-[31px]
             w-[115px]
             items-center
             justify-center
             rounded-full
-            bg-[#DDF3E8]
             text-[12px]
             font-medium
-            shadow-[0_2px_5px_rgba(0,0,0,0.15)]"
+            shadow-[0_2px_5px_rgba(0,0,0,0.15)]
+            ${estiloDisponibilidad}`}
         >
-            Disponible
+            {textoDisponibilidad}
         </div>
 
         {/* ACCIONES */}
@@ -103,6 +115,7 @@ export default function AdminProductosConsulta({producto, actualizarAprobacionPr
 
             <button
                 type="button"
+                onClick={() => actualizarAprobacionProducto(producto._id)}
                 className="
                 flex
                 h-[31px]
@@ -123,6 +136,7 @@ export default function AdminProductosConsulta({producto, actualizarAprobacionPr
 
             <button
                 type="button"
+                onClick={() => actualizarRechazarProducto(producto._id)}
                 className="
                 flex
                 h-[31px]

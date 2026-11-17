@@ -1,19 +1,8 @@
-export default function DisponibilidadProducto(disponibilidad){
+export default function DisponibilidadProducto({ disponibilidad }) {
 
-    console.log(disponibilidad)
+    // La disponibilidad puede llegar como booleano (true/false) o como texto ("true"/"false")
+    const estaDisponible = disponibilidad === true || disponibilidad === 'true';
 
-    let Disponible;
-
-    if(disponibilidad){
-
-        Disponible = 'Disponible'
-
-    }else{
-
-        Disponible = 'No disponible'
-
-    }
-
-    return Disponible;
+    return estaDisponible ? 'Disponible' : 'No disponible';
 
 }

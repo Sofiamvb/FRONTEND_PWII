@@ -1,37 +1,94 @@
+import React, { useState } from 'react';
+import { useNavigate } from "react-router-dom";
+import clienteAxios from "../../config/axios";
+import Swal from 'sweetalert2';
+
 export default function Reports() {
+
+     //usuario = state, guaradarUsuario = funcion para guaradar el state
+    const [reportes, guardarReporte] = useState({
+        tipo_de_reporte: '',
+        usuario_reportado: '',
+        motivo: '',
+        descripcionReporte: '',
+        estadoReporte: ''
+    });
+
+    //Leer datos del formulario
+    const actualizarState = e => {
+        //Almacenar lo que escribe el uauario en el state
+        guardarReporte({
+            //crear una copia de el state actaul
+            ...reportes,
+            [e.target.name]: e.target.value
+        })
+    }
+
+    //Añadir un cliente nuevo
+    const agregarReporte = e => {
+
+        e.preventDefault();
+        // enviar peticion
+        clienteAxios.post('/users', usuario)
+            .then(res => {
+                console.log(res)
+
+                Swal.fire({
+                    title: "Se ha registrado!",
+                    text: res.data.mensaje,
+                    icon: "success"
+                });
+
+                navigate('/auth');
+
+            })
+            .catch(error => {
+                console.log('Error interno al guardar en la base de datos')
+                Swal.fire({
+                    icon: 'error',
+                    title: "Hubo un error",
+                    text: 'Error al registrarse'
+
+                });
+            })
+
+    }
+
     return (
         <>
-            <div className="min-h-screen w-full bg-[#FFFFED] pb-8 pt-24 px-8 md:pb-12 md:pt-32 md:pr-12 md:pl-32 lg:pl-64 font-sans">
+            <div className="min-h-screen w-full bg-[#FFFFED] pb-8 pt-24 px-8 md:pb-12 md:pt-28 md:pr-12 md:pl-32 lg:pl-64 font-sans">
 
-                <div className="grid grid-cols-1 gap-10 xl:grid-cols-[1.05fr_0.95fr]">
+                <div className="mx-auto grid max-w-[1400px] grid-cols-1 gap-8 xl:grid-cols-2">
 
                     <div>
 
-                        <h1 className="ml-6 mb-10 text-4xl font-extrabold text-[#1f1f22]">
+                        <h1 className="mb-7 text-[34px] font-extrabold leading-tight text-[#1f1f22]">
                             Reportar un Problema
                         </h1>
 
                         {/* TARJETA DEL FORMULARIO */}
                         <div
                             className="
-                                min-h-[540px]
+                                flex
+                                min-h-[480px]
                                 w-full
-                                rounded-[25px]
+                                flex-col
+                                rounded-[22px]
                                 bg-white
-                                px-8
+                                px-7
                                 py-7
-                                shadow-[0_4px_10px_rgba(0,0,0,0.20)]
+                                shadow-[0_4px_12px_rgba(0,0,0,0.13)]
                             "
                         >
-
-                            <div className="mb-7">
+                            {/* TIPO */}
+                            <div className="mb-5">
 
                                 <label
                                     htmlFor="tipoReporte"
                                     className="
-                                        mb-3
+                                        mb-2
                                         block
-                                        text-[14px]
+                                        text-[13px]
                                         font-extrabold
                                         text-[#252429]
                                     "
@@ -39,25 +96,22 @@ export default function Reports() {
                                     Tipo:
                                 </label>
 
-
                                 <div className="relative">
 
                                     <select
                                         id="tipoReporte"
                                         defaultValue=""
                                         className="
-                                            h-[50px]
+                                            h-[42px]
                                             w-full
                                             appearance-none
-                                            rounded-[17px]
-                                            border
-                                            border-gray-100
-                                            bg-[#FAFAFA]
-                                            px-5
-                                            pr-12
-                                            text-sm
-                                            text-gray-500
-                                            shadow-[0_3px_5px_rgba(0,0,0,0.20)]
+                                            rounded-[14px]
+                                            bg-[#FBFBFB]
+                                            px-4
+                                            pr-11
+                                            text-[13px]
+                                            text-[#858585]
+                                            shadow-[0_2px_5px_rgba(0,0,0,0.13)]
                                             outline-none
                                         "
                                     >
@@ -71,20 +125,19 @@ export default function Reports() {
                                         <option>Venta</option>
                                     </select>
 
-
                                     {/* FLECHA */}
                                     <div
                                         className="
                                             pointer-events-none
                                             absolute
-                                            right-5
+                                            right-4
                                             top-1/2
                                             -translate-y-1/2
                                         "
                                     >
                                         <svg
-                                            width="18"
-                                            height="18"
+                                            width="16"
+                                            height="16"
                                             viewBox="0 0 20 20"
                                             fill="none"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -100,14 +153,49 @@ export default function Reports() {
 
                             </div>
 
-                            <div className="mb-7">
+                            {/* USUARIO REPORTADO */}
+                            <div className="mb-5">
+
+                                <label
+                                    htmlFor="usuarioReportado"
+                                    className="
+                                        mb-2
+                                        block
+                                        text-[13px]
+                                        font-extrabold
+                                        text-[#252429]
+                                    "
+                                >
+                                    Estas por reportar a @Usuario
+                                </label>
+
+                                <input
+                                    id="usuarioReportado"
+                                    type="text"
+                                    className="
+                                        h-[42px]
+                                        w-full
+                                        rounded-[14px]
+                                        bg-[#FBFBFB]
+                                        px-4
+                                        text-[13px]
+                                        text-[#252429]
+                                        shadow-[0_2px_5px_rgba(0,0,0,0.13)]
+                                        outline-none
+                                    "
+                                />
+
+                            </div>
+
+                            {/* MOTIVO */}
+                            <div className="mb-5">
 
                                 <label
                                     htmlFor="motivoReporte"
                                     className="
-                                        mb-3
+                                        mb-2
                                         block
-                                        text-[14px]
+                                        text-[13px]
                                         font-extrabold
                                         text-[#252429]
                                     "
@@ -121,16 +209,16 @@ export default function Reports() {
                                         id="motivoReporte"
                                         defaultValue=""
                                         className="
-                                            h-[50px]
+                                            h-[42px]
                                             w-full
                                             appearance-none
-                                            rounded-[17px]                                           
-                                            bg-[#FAFAFA]
-                                            px-5
-                                            pr-12
-                                            text-sm
-                                            text-gray-500
-                                            shadow-[0_3px_5px_rgba(0,0,0,0.18)]
+                                            rounded-[14px]
+                                            bg-[#FBFBFB]
+                                            px-4
+                                            pr-11
+                                            text-[13px]
+                                            text-[#858585]
+                                            shadow-[0_2px_5px_rgba(0,0,0,0.13)]
                                             outline-none
                                         "
                                     >
@@ -144,20 +232,19 @@ export default function Reports() {
                                         <option>Comportamiento inadecuado</option>
                                     </select>
 
-
                                     {/* FLECHA */}
                                     <div
                                         className="
                                             pointer-events-none
                                             absolute
-                                            right-5
+                                            right-4
                                             top-1/2
                                             -translate-y-1/2
                                         "
                                     >
                                         <svg
-                                            width="18"
-                                            height="18"
+                                            width="16"
+                                            height="16"
                                             viewBox="0 0 20 20"
                                             fill="none"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -173,14 +260,15 @@ export default function Reports() {
 
                             </div>
 
-                            <div className="mb-8">
+                            {/* DESCRIPCIÓN */}
+                            <div className="mb-6">
 
                                 <label
                                     htmlFor="descripcionReporte"
                                     className="
-                                        mb-3
+                                        mb-2
                                         block
-                                        text-[14px]
+                                        text-[13px]
                                         font-extrabold
                                         text-[#252429]
                                     "
@@ -188,22 +276,19 @@ export default function Reports() {
                                     Descripción:
                                 </label>
 
-
                                 <textarea
                                     id="descripcionReporte"
                                     rows="6"
                                     className="
-                                        min-h-[150px]
+                                        min-h-[120px]
                                         w-full
                                         resize-none
-                                        rounded-[17px]
-                                        border
-                                        border-gray-100
-                                        bg-[#FAFAFA]
-                                        p-5
-                                        text-sm
+                                        rounded-[14px]
+                                        bg-[#F8F8F8]
+                                        p-4
+                                        text-[13px]
                                         text-[#252429]
-                                        shadow-[0_3px_5px_rgba(0,0,0,0.20)]
+                                        shadow-[0_2px_5px_rgba(0,0,0,0.10)]
                                         outline-none
                                     "
                                 />
@@ -213,8 +298,9 @@ export default function Reports() {
                             <button
                                 type="button"
                                 className="
+                                    mt-auto
                                     flex
-                                    h-[50px]
+                                    h-[46px]
                                     w-full
                                     items-center
                                     justify-center
@@ -223,12 +309,12 @@ export default function Reports() {
                                     text-[16px]
                                     font-extrabold
                                     text-[#252429]
-                                    shadow-[0_3px_5px_rgba(0,0,0,0.20)]
+                                    shadow-[0_3px_6px_rgba(0,0,0,0.18)]
                                     transition
                                     hover:brightness-95
                                 "
                             >
-                                Enviar Reporte
+                                Enviar
                             </button>
 
                         </div>
@@ -237,38 +323,40 @@ export default function Reports() {
 
                     <div>
 
-                        <h1 className="mb-10 text-4xl font-extrabold text-[#1f1f22]">
+                        <h1 className="mb-7 text-[34px] font-extrabold leading-tight text-[#1f1f22]">
                             Mis Reportes
                         </h1>
-
 
                         {/* TARJETA DE REPORTES */}
                         <div
                             className="
-                                min-h-[540px]
+                                flex
+                                min-h-[480px]
                                 w-full
-                                rounded-[25px]
+                                flex-col
+                                gap-3
+                                rounded-[22px]
                                 bg-white
-                                px-5
-                                py-5
-                                shadow-[0_4px_10px_rgba(0,0,0,0.20)]
+                                px-4
+                                py-4
+                                shadow-[0_4px_12px_rgba(0,0,0,0.13)]
                             "
                         >
 
+                            {/* REPORTE */}
                             <div
                                 className="
-                                    mb-5
                                     flex
-                                    min-h-[86px]
+                                    min-h-[62px]
                                     w-full
                                     items-center
                                     justify-between
-                                    gap-5
-                                    rounded-[25px]
+                                    gap-4
+                                    rounded-[16px]
                                     bg-[#FFFDF8]
-                                    px-6
-                                    py-4
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
+                                    px-5
+                                    py-3
+                                    shadow-[0_2px_6px_rgba(0,0,0,0.13)]
                                 "
                             >
 
@@ -277,7 +365,7 @@ export default function Reports() {
 
                                     <h2
                                         className="
-                                            text-[15px]
+                                            text-[13px]
                                             font-extrabold
                                             text-[#252429]
                                         "
@@ -288,35 +376,33 @@ export default function Reports() {
                                     <p
                                         className="
                                             mt-1
-                                            max-w-[260px]
-                                            text-[12px]
+                                            max-w-[185px]
+                                            text-[11px]
                                             font-medium
-                                            leading-[16px]
-                                            text-[#858585]
+                                            leading-[14px]
+                                            text-[#9A9A9A]
                                         "
                                     >
-                                        Una publicación fuera de lugar en la pagina
+                                        Una publicacion fuera de lugar en la pagina
                                     </p>
 
                                 </div>
-
 
                                 {/* ESTADO */}
                                 <span
                                     className="
                                         flex
-                                        h-[30px]
-                                        min-w-[105px]
+                                        h-[25px]
                                         shrink-0
                                         items-center
                                         justify-center
                                         rounded-full
                                         bg-[#FFF0AD]
                                         px-4
-                                        text-[12px]
+                                        text-[11px]
                                         font-medium
                                         text-[#252429]
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.16)]
+                                        shadow-[0_2px_4px_rgba(0,0,0,0.14)]
                                     "
                                 >
                                     Pendiente
@@ -324,19 +410,20 @@ export default function Reports() {
 
                             </div>
 
+                            {/* REPORTE */}
                             <div
                                 className="
                                     flex
-                                    min-h-[86px]
+                                    min-h-[62px]
                                     w-full
                                     items-center
                                     justify-between
-                                    gap-5
-                                    rounded-[25px]
+                                    gap-4
+                                    rounded-[16px]
                                     bg-[#FFFDF8]
-                                    px-6
-                                    py-4
-                                    shadow-[0_3px_6px_rgba(0,0,0,0.20)]
+                                    px-5
+                                    py-3
+                                    shadow-[0_2px_6px_rgba(0,0,0,0.13)]
                                 "
                             >
 
@@ -345,7 +432,7 @@ export default function Reports() {
 
                                     <h2
                                         className="
-                                            text-[15px]
+                                            text-[13px]
                                             font-extrabold
                                             text-[#252429]
                                         "
@@ -356,14 +443,14 @@ export default function Reports() {
                                     <p
                                         className="
                                             mt-1
-                                            max-w-[260px]
-                                            text-[12px]
+                                            max-w-[185px]
+                                            text-[11px]
                                             font-medium
-                                            leading-[16px]
-                                            text-[#858585]
+                                            leading-[14px]
+                                            text-[#9A9A9A]
                                         "
                                     >
-                                        Publicación engañosa para los usuarios
+                                        Publicacion engañosa para los usuarios
                                     </p>
 
                                 </div>
@@ -372,18 +459,17 @@ export default function Reports() {
                                 <span
                                     className="
                                         flex
-                                        h-[30px]
-                                        min-w-[105px]
+                                        h-[25px]
                                         shrink-0
                                         items-center
                                         justify-center
                                         rounded-full
                                         bg-[#FFF0AD]
                                         px-4
-                                        text-[12px]
+                                        text-[11px]
                                         font-medium
                                         text-[#252429]
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.16)]
+                                        shadow-[0_2px_4px_rgba(0,0,0,0.14)]
                                     "
                                 >
                                     Pendiente

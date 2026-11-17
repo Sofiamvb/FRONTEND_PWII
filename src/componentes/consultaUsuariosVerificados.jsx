@@ -1,5 +1,3 @@
-// Color del recuadro según el estado de la verificación
-// (las clases van completas para que Tailwind las detecte)
 const coloresVerificacion = {
     'sin enviar': 'bg-[#FAE568]',   // amarillo
     'pendiente':  'bg-[#7DB9FF]',   // azul

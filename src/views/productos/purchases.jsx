@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import clienteAxios from '../../config/axios';
+import * as pedidosService from '../../services/pedidosService';
 import Swal from 'sweetalert2';
 import { Link, useParams, useNavigate } from "react-router-dom"
 import MisCompras from '../../componentes/misCompras';
@@ -11,9 +11,9 @@ export default function Purchases() {
     const [misCompras, guardarMisCompras] = useState([]);
 
     const consultarAPI = async () => {
-        const comprasConsulta = await clienteAxios.get(`/pedidos/compras/${idUsuario}`);
+        const comprasConsulta = await pedidosService.obtenerCompras(idUsuario);
         console.log(comprasConsulta)
-        guardarMisCompras(comprasConsulta.data.compras);
+        guardarMisCompras(comprasConsulta.compras);
     }
 
     useEffect(() => {

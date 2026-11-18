@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import clienteAxios from "../../config/axios";
+import * as usuariosService from "../../services/usuariosService";
 import Swal from 'sweetalert2';
 import { Link } from "react-router-dom"
 
@@ -49,11 +49,9 @@ export default function Verification() {
         //Guardar en la base de  datos
         try {
             //Enviar peticion 
-            const res = await clienteAxios.post(`/users/verificacion/${idUsuario}`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+            const res = await usuariosService.enviarVerificacion(idUsuario, formData);
+
+            sessionStorage.setItem('verificacion', 'pendiente');
 
             Swal.fire({
                 title: "Se ha enviado ha revision!",
@@ -158,6 +156,16 @@ export default function Verification() {
                         >
                             Enviar a revisión
                         </button>
+
+                        {/* La verificacion no es obligatoria para entrar, se puede hacer despues */}
+                        <div className="text-center">
+                            <Link
+                                to="/home"
+                                className="cursor-pointer text-xs font-semibold text-gray-500 hover:underline"
+                            >
+                                Omitir por ahora, lo haré después
+                            </Link>
+                        </div>
 
                     </form>
                 </div>

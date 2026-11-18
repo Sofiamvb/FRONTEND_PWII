@@ -1,4 +1,65 @@
+import { useState, useEffect } from 'react';
+import * as adminService from '../../services/adminService';
+import Swal from 'sweetalert2';
+import ReporteAdmin from '../../componentes/reporteAdmin';
+
 export default function AdminReportes() {
+
+    const [reportes, guardarReportes] = useState([]);
+
+    const consultarAPI = async () => {
+        try {
+            const respuesta = await adminService.obtenerReportes();
+
+            // Los cerrados ya no se muestran: la lista es de lo que falta revisar
+            guardarReportes(respuesta.filter(reporte => reporte.estadoReporte !== 'cerrado'));
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    useEffect(() => {
+        consultarAPI();
+    }, []);
+
+    // Mensaje del backend, o uno generico si no vino ninguno
+    const mensajeDeError = error => {
+        return error.response && error.response.data
+            ? error.response.data.mensaje
+            : 'Vuelve a intentar';
+    }
+
+    // Cerrar el reporte: lo deja en 'cerrado' y por eso sale de la lista
+    const cerrarReporte = async reporte => {
+
+        const confirmacion = await Swal.fire({
+            title: '¿Cerrar este reporte?',
+            text: 'Se marcará como cerrado y saldrá de la lista',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, cerrar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#FF797C',
+            cancelButtonColor: '#D7D8DD'
+        });
+
+        if (!confirmacion.isConfirmed) {
+            return;
+        }
+
+        try {
+            const res = await adminService.cerrarReporte(reporte._id);
+
+            Swal.fire({ icon: 'success', title: 'Listo', text: res.mensaje });
+
+            consultarAPI();
+
+        } catch (error) {
+            console.log(error);
+            Swal.fire({ icon: 'error', title: 'No se pudo cerrar', text: mensajeDeError(error) });
+        }
+    }
+
     return (
         <>
             <div className="min-h-screen w-full bg-[#FFFFED] px-8 pb-12 pt-8 md:px-12 font-sans">
@@ -114,366 +175,23 @@ export default function AdminReportes() {
                     <div className="px-4 py-4 md:px-5">
 
 
-                        {/* =================================================
-                            REPORTE 1
-                        ================================================== */}
-                        <div
-                            className="
-                                mb-6
-                                flex
-                                min-h-[100px]
-                                w-full
-                                flex-col
-                                justify-between
-                                gap-5
-                                rounded-[30px]
-                                bg-white
-                                px-8
-                                py-5
-                                shadow-[0_4px_8px_rgba(0,0,0,0.20)]
-                                lg:flex-row
-                                lg:items-center
-                            "
-                        >
+                        {
+                            reportes.map(reporte => (
+                                <ReporteAdmin
+                                    key={reporte._id}
+                                    reporte={reporte}
+                                    onCerrar={cerrarReporte}
+                                />
+                            ))
+                        }
 
-                            {/* INFORMACIÓN */}
-                            <div>
-
-                                <h3 className="text-[18px] font-extrabold text-[#252429]">
-                                    Publicación Inapropiada
-                                </h3>
-
-                                <p
-                                    className="
-                                        mt-1
-                                        max-w-[350px]
-                                        text-[14px]
-                                        font-semibold
-                                        leading-[20px]
-                                        text-[#929292]
-                                    "
-                                >
-                                    Una publicación fuera de lugar en la pagina
+                        {
+                            reportes.length === 0 && (
+                                <p className="py-6 text-center text-sm font-medium text-gray-500">
+                                    No hay reportes pendientes por revisar.
                                 </p>
-
-                            </div>
-
-
-                            {/* ACCIONES */}
-                            <div className="flex flex-wrap items-center gap-3">
-
-                                <button
-                                    type="button"
-                                    className="
-                                        flex
-                                        h-[36px]
-                                        min-w-[75px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FFFDF8]
-                                        px-5
-                                        text-[12px]
-                                        font-extrabold
-                                        text-[#252429]
-                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                        transition
-                                        hover:brightness-95
-                                    "
-                                >
-                                    Ver
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    className="
-                                        flex
-                                        h-[36px]
-                                        min-w-[100px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FAE568]
-                                        px-5
-                                        text-[12px]
-                                        font-extrabold
-                                        text-[#252429]
-                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                        transition
-                                        hover:brightness-95
-                                    "
-                                >
-                                    Borrar
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    className="
-                                        flex
-                                        h-[36px]
-                                        min-w-[100px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FF797C]
-                                        px-5
-                                        text-[12px]
-                                        font-extrabold
-                                        text-[#252429]
-                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                        transition
-                                        hover:brightness-95
-                                    "
-                                >
-                                    Rechazar
-                                </button>
-
-                            </div>
-
-                        </div>
-
-
-                        {/* =================================================
-                            REPORTE 2
-                        ================================================== */}
-                        <div
-                            className="
-                                mb-6
-                                flex
-                                min-h-[100px]
-                                w-full
-                                flex-col
-                                justify-between
-                                gap-5
-                                rounded-[30px]
-                                bg-white
-                                px-8
-                                py-5
-                                shadow-[0_4px_8px_rgba(0,0,0,0.20)]
-                                lg:flex-row
-                                lg:items-center
-                            "
-                        >
-
-                            {/* INFORMACIÓN */}
-                            <div>
-
-                                <h3 className="text-[18px] font-extrabold text-[#252429]">
-                                    Posible Fraude
-                                </h3>
-
-                                <p
-                                    className="
-                                        mt-1
-                                        max-w-[350px]
-                                        text-[14px]
-                                        font-semibold
-                                        leading-[20px]
-                                        text-[#929292]
-                                    "
-                                >
-                                    Publicación engañosa para los usuarios
-                                </p>
-
-                            </div>
-
-
-                            {/* ACCIONES */}
-                            <div className="flex flex-wrap items-center gap-3">
-
-                                <button
-                                    type="button"
-                                    className="
-                                        flex
-                                        h-[36px]
-                                        min-w-[75px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FFFDF8]
-                                        px-5
-                                        text-[12px]
-                                        font-extrabold
-                                        text-[#252429]
-                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                        transition
-                                        hover:brightness-95
-                                    "
-                                >
-                                    Ver
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    className="
-                                        flex
-                                        h-[36px]
-                                        min-w-[100px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FAE568]
-                                        px-5
-                                        text-[12px]
-                                        font-extrabold
-                                        text-[#252429]
-                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                        transition
-                                        hover:brightness-95
-                                    "
-                                >
-                                    Borrar
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    className="
-                                        flex
-                                        h-[36px]
-                                        min-w-[100px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FF797C]
-                                        px-5
-                                        text-[12px]
-                                        font-extrabold
-                                        text-[#252429]
-                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                        transition
-                                        hover:brightness-95
-                                    "
-                                >
-                                    Rechazar
-                                </button>
-
-                            </div>
-
-                        </div>
-
-
-                        {/* =================================================
-                            REPORTE 3
-                        ================================================== */}
-                        <div
-                            className="
-                                flex
-                                min-h-[100px]
-                                w-full
-                                flex-col
-                                justify-between
-                                gap-5
-                                rounded-[30px]
-                                bg-white
-                                px-8
-                                py-5
-                                shadow-[0_4px_8px_rgba(0,0,0,0.20)]
-                                lg:flex-row
-                                lg:items-center
-                            "
-                        >
-
-                            {/* INFORMACIÓN */}
-                            <div>
-
-                                <h3 className="text-[18px] font-extrabold text-[#252429]">
-                                    Comentario Inapropiado
-                                </h3>
-
-                                <p
-                                    className="
-                                        mt-1
-                                        max-w-[350px]
-                                        text-[14px]
-                                        font-semibold
-                                        leading-[20px]
-                                        text-[#929292]
-                                    "
-                                >
-                                    Un usuario insulto en los comentarios
-                                </p>
-
-                            </div>
-
-
-                            {/* ACCIONES */}
-                            <div className="flex flex-wrap items-center gap-3">
-
-                                <button
-                                    type="button"
-                                    className="
-                                        flex
-                                        h-[36px]
-                                        min-w-[75px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FFFDF8]
-                                        px-5
-                                        text-[12px]
-                                        font-extrabold
-                                        text-[#252429]
-                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                        transition
-                                        hover:brightness-95
-                                    "
-                                >
-                                    Ver
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    className="
-                                        flex
-                                        h-[36px]
-                                        min-w-[100px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FAE568]
-                                        px-5
-                                        text-[12px]
-                                        font-extrabold
-                                        text-[#252429]
-                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                        transition
-                                        hover:brightness-95
-                                    "
-                                >
-                                    Borrar
-                                </button>
-
-
-                                <button
-                                    type="button"
-                                    className="
-                                        flex
-                                        h-[36px]
-                                        min-w-[100px]
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FF797C]
-                                        px-5
-                                        text-[12px]
-                                        font-extrabold
-                                        text-[#252429]
-                                        shadow-[0_3px_6px_rgba(0,0,0,0.20)]
-                                        transition
-                                        hover:brightness-95
-                                    "
-                                >
-                                    Rechazar
-                                </button>
-
-                            </div>
-
-                        </div>
+                            )
+                        }
 
                     </div>
 

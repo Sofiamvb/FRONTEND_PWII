@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import clienteAxios from "../../config/axios";
+import * as adminService from "../../services/adminService";
 import Swal from 'sweetalert2';
 import Verificaciones from '../../componentes/consultaVerificaciones';
 
@@ -9,9 +9,9 @@ export default function VerificationAdmin() {
 
     const consultarAPI = async () => {
         try {
-            const verificacionConsulta = await clienteAxios.get('/admin/mostrarVerificaciones');
-            console.log(verificacionConsulta.data);
-            guardarVerificaciones(verificacionConsulta.data);
+            const verificacionConsulta = await adminService.obtenerVerificacionesPendientes();
+            console.log(verificacionConsulta);
+            guardarVerificaciones(verificacionConsulta);
         } catch (error) {
             console.log(error);
         }
@@ -27,11 +27,11 @@ export default function VerificationAdmin() {
     const cambiarEstadoVerificacion = async (id, estado) => {
         try {
 
-            const res = await clienteAxios.patch(`/admin/verificacionEstatus/${id}`, { estado });
+            const res = await adminService.cambiarEstadoVerificacion(id, estado);
 
             Swal.fire({
                 title: "¡Listo!",
-                text: res.data.mensaje,
+                text: res.mensaje,
                 icon: "success"
             });
 

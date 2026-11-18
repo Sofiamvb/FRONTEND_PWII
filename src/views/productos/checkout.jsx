@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import clienteAxios from '../../config/axios';
+import * as productosService from '../../services/productosService';
+import * as pedidosService from '../../services/pedidosService';
 import Swal from 'sweetalert2';
 import { Link, useParams, useNavigate } from "react-router-dom"
+import {
+    validarTarjeta,
+    soloDigitosDe,
+    quitarNumeros,
+    formatearNumeroTarjeta,
+    formatearVencimiento
+} from '../../helpers/validarTarjeta'
 
 // Estilos compartidos
 const labelClass = "mb-2 block pl-3 text-[13px] font-bold text-[#252429]"
@@ -54,8 +62,8 @@ export default function Checkout() {
     console.log(producto)
 
     const consultarAPI = async () => {
-        const productoConsulta = await clienteAxios.get(`/productos/${idProducto}`)
-        guardarProducto(productoConsulta.data);
+        const productoConsulta = await productosService.obtenerProducto(idProducto)
+        guardarProducto(productoConsulta);
 
     }
 
@@ -79,11 +87,33 @@ export default function Checkout() {
 
     //Leer datos del formulario
     const actualizarState = e => {
+
+        const campo = e.target.name;
+        let valor = e.target.value;
+
+        // Se limpia lo que se escribe para que no entren caracteres que no van.
+        // Asi no se puede teclear una letra en el numero de la tarjeta.
+        if (campo === 'numero_tarjeta') {
+            valor = formatearNumeroTarjeta(valor);
+        }
+
+        if (campo === 'vencimiento_tarjeta') {
+            valor = formatearVencimiento(valor);
+        }
+
+        if (campo === 'cvv_tarjeta') {
+            valor = soloDigitosDe(valor).slice(0, 4);
+        }
+
+        if (campo === 'titular_tarjeta') {
+            valor = quitarNumeros(valor);
+        }
+
         //Almacenar lo que escribe el uauario en el state
         guardarPago({
             //crear una copia de el state actaul
             ...pago,
-            [e.target.name]: e.target.value
+            [campo]: valor
         })
     }
 
@@ -91,7 +121,34 @@ export default function Checkout() {
 
     const realizarPago = (e) => {
         e.preventDefault()
-        
+
+        // Antes de cobrar nada se revisa la tarjeta
+        const errores = validarTarjeta(pago);
+
+        if (errores.length > 0) {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Revisa los datos de tu tarjeta',
+                // Se listan todos los errores juntos para no corregir de uno en uno
+                html: '<ul style="text-align:left; margin:0; padding-left:20px">' +
+                    errores.map(error => `<li>${error}</li>`).join('') +
+                    '</ul>'
+            });
+
+            return;
+        }
+
+        // Sin punto de encuentro no hay donde entregar
+        if (!producto.punto_encuentro) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No se puede comprar',
+                text: 'Esta publicación no tiene punto de encuentro. Pídele al vendedor que lo actualice.'
+            });
+            return;
+        }
+
         const datos = {
             titular_tarjeta: pago.titular_tarjeta,
             numero_tarjeta: pago.numero_tarjeta,
@@ -104,8 +161,8 @@ export default function Checkout() {
                 nombre_producto: producto.nombre_produ,
                 descripcion_producto: producto.descripcion,
                 precio_producto: producto.precio,
-                zona: producto.punto_encuentro.zona,
-                lugar: producto.punto_encuentro.lugar,
+                zona: producto.punto_encuentro?.zona,
+                lugar: producto.punto_encuentro?.lugar,
                 condicion: producto.condicion,
                 categoria: producto.categoria,
                 stock: producto.stock,
@@ -118,17 +175,31 @@ export default function Checkout() {
         console.log('dato:',datos)
      
         // enviar peticion
-        clienteAxios.post(`/pedidos/comprar/${idProducto}/${idComprador}`, datos)
+        pedidosService.comprarProducto(idProducto, idComprador, datos)
             .then(res => {
 
                 Swal.fire({
                     title: "Compra finalizada",
-                    text: res.data.mensaje,
+                    text: res.mensaje,
                     icon: "success"
                 });
 
-                navigate(`/home/purchases/detail/${res.data.pedido._id}`);
+                navigate(`/home/purchases/detail/${res.pedido._id}`);
 
+            })
+            .catch(error => {
+                console.log(error)
+
+                // El backend explica por que no se pudo (p. ej. falta verificarse)
+                const mensaje = error.response && error.response.data
+                    ? error.response.data.mensaje
+                    : 'Vuelve a intentar';
+
+                Swal.fire({
+                    icon: 'error',
+                    title: "No se pudo completar la compra",
+                    text: mensaje
+                });
             })
             
 
@@ -184,6 +255,7 @@ export default function Checkout() {
                                     type="text"
                                     autoComplete="cc-name"
                                     placeholder="Nombre completo"
+                                    value={pago.titular_tarjeta}
                                     className={inputClass}
                                     required
                                     onChange={actualizarState}
@@ -202,6 +274,8 @@ export default function Checkout() {
                                     inputMode="numeric"
                                     autoComplete="cc-number"
                                     placeholder="0000 0000 0000 0000"
+                                    value={pago.numero_tarjeta}
+                                    maxLength={19}
                                     className={inputClass}
                                     required
                                     onChange={actualizarState}
@@ -221,6 +295,8 @@ export default function Checkout() {
                                         inputMode="numeric"
                                         autoComplete="cc-exp"
                                         placeholder="MM/AA"
+                                        value={pago.vencimiento_tarjeta}
+                                        maxLength={5}
                                         className={inputClass}
                                         required
                                         onChange={actualizarState}
@@ -238,6 +314,8 @@ export default function Checkout() {
                                         inputMode="numeric"
                                         autoComplete="cc-csc"
                                         placeholder="•••"
+                                        value={pago.cvv_tarjeta}
+                                        maxLength={4}
                                         className={inputClass}
                                         required
                                         onChange={actualizarState}
@@ -303,7 +381,7 @@ export default function Checkout() {
                                 </p>
                                 <p className="mt-0.5 text-[11px] font-medium text-[#9A9898]"
                                 >
-                                    {`${producto.punto_encuentro.zona}|${producto.condicion}`}
+                                    {`${producto.punto_encuentro?.zona || 'Sin punto de encuentro'}|${producto.condicion}`}
                                 </p>
                             </div>
                         </div>
@@ -314,7 +392,7 @@ export default function Checkout() {
                         {/* DETALLES */}
                         <div className="my-6 space-y-4">
                             <FilaDetalle etiqueta="Precio" valor={`$${producto.precio}`} />
-                            <FilaDetalle etiqueta="Ubicación" valor={producto.punto_encuentro.lugar} />
+                            <FilaDetalle etiqueta="Ubicación" valor={producto.punto_encuentro?.lugar || 'Sin punto de encuentro'} />
                             <FilaDetalle etiqueta="Vendedor" valor={producto.usuario.name} />
                             <FilaDetalle etiqueta="Cantidad" valor={producto.stock} />
                         </div>

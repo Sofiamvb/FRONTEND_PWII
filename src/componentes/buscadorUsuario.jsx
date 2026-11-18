@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import clienteAxios from '../config/axios';
+import * as usuariosService from '../services/usuariosService';
 
 const estiloInput = `
     h-[42px]
@@ -41,10 +41,8 @@ export default function BuscadorUsuario({ id, onSeleccionar }) {
 
         const temporizador = setTimeout(async () => {
             try {
-                const res = await clienteAxios.get('/users/buscar', {
-                    params: { buscar: busqueda }
-                });
-                setResultados(res.data);
+                const usuarios = await usuariosService.buscarUsuarios(busqueda);
+                setResultados(usuarios);
             } catch (error) {
                 console.log(error);
             }

@@ -1,13 +1,27 @@
 import { Link } from 'react-router-dom'
 import { Outlet } from 'react-router-dom'
+import { useNavigate } from "react-router-dom";
 
 export default function LayoutAdmin() {
+
+    const navigate = useNavigate();
+
+    function logout() {
+
+        sessionStorage.clear();
+
+        navigate('/auth');
+
+    }
+
     return (
         <>
           <header className="fixed top-0 left-0 right-0 h-[60px] bg-[#252429] z-50 flex items-center">
 
 
-                <div className="w-[52px] h-full flex items-center justify-center text-white">Logo</div>
+                <div className="w-[65px] h-full flex items-center justify-center">
+                    <img src="/img/UniMarket.png" alt="UniMarket" className="h-8 w-auto" />
+                </div>
 
                     <div className="ml-auto flex items-center gap-4 pr-8">
 
@@ -22,9 +36,8 @@ export default function LayoutAdmin() {
                                         </Link>
 
                                         
-                                        <Link 
-                                        to="/home/profile"
-                                        className="flex h-10 w-10 cursor-pointer items-center justify-center">
+                                        <div
+                                        className="flex h-10 w-10 items-center justify-center">
                                             <svg width="30" height="30" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                                                 <path d="M20 3.75C11.0398 3.75 3.75 11.0398 3.75 20C3.75 28.9602 11.0398 36.25 20 36.25C28.9602 36.25 
                                                 36.25 28.9602 36.25 20C36.25 11.0398 28.9602 3.75 20 3.75ZM16.0766 12.8766C17.0664 11.8273 18.4594 11.25 
@@ -35,7 +48,19 @@ export default function LayoutAdmin() {
                                                 25C22.5867 25 25.107 25.7031 27.0961 26.9797C28.1766 27.6592 29.1107 28.5473 29.8438 29.5922C28.565 30.909 
                                                 27.0347 31.9556 25.3437 32.6699C23.6528 33.3841 21.8356 33.7514 20 33.75Z" fill="#F7F7EF" />
                                             </svg>
-                                        </Link>
+                                        </div>
+
+                                        {/* Sin esto el admin no tendria por donde salir:
+                                            /home es zona de estudiantes y lo regresaria aqui */}
+                                        <button
+                                            onClick={logout}
+                                            title="Cerrar sesión"
+                                            className="flex h-10 w-10 cursor-pointer items-center justify-center transition-opacity hover:opacity-70">
+                                            <svg width="30" height="30" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path fillRule='evenodd' clipRule='evenodd' d="M26.875 20C26.875 19.3097 26.3153 18.75 25.625 18.75H7.33738L10.6051 15.9491C11.1293 15.4998 11.19 14.7107 10.7407 14.1865C10.2914 13.6624 9.50231 13.6017 8.97816 14.051L3.14483 19.051C2.86776 19.2884 2.70831 19.6352 2.70831 20C2.70831 20.3649 2.86776 20.7117 3.14483 20.949L8.97816 25.949C9.50231 26.3984 10.2914 26.3377 10.7407 25.8135C11.19 25.2894 11.1293 24.5002 10.6051 24.051L7.33738 21.25H25.625C26.3153 21.25 26.875 20.6904 26.875 20Z" fill="#F7F7EF" />
+                                                <path d="M15.625 13.3335C15.625 14.5038 15.625 15.089 15.9059 15.5093C16.0275 15.6913 16.1837 15.8476 16.3658 15.9692C16.7862 16.2501 17.3713 16.2501 18.5417 16.2501H25.625C27.696 16.2501 29.375 17.929 29.375 20.0002C29.375 22.0712 27.696 23.7502 25.625 23.7502H18.5417C17.3713 23.7502 16.786 23.7502 16.3657 24.031C16.1837 24.1527 16.0275 24.3088 15.9059 24.4908C15.625 24.9112 15.625 25.4963 15.625 26.6668C15.625 31.3808 15.625 33.7378 17.0895 35.2023C18.554 36.6668 20.9107 36.6668 25.6247 36.6668H27.2913C32.0053 36.6668 34.3623 36.6668 35.8268 35.2023C37.2913 33.7378 37.2913 31.3808 37.2913 26.6668V13.3335C37.2913 8.61946 37.2913 6.26243 35.8268 4.79796C34.3623 3.3335 32.0053 3.3335 27.2913 3.3335H25.6247C20.9107 3.3335 18.554 3.3335 17.0895 4.79796C15.625 6.26243 15.625 8.61945 15.625 13.3335Z" fill="#F7F7EF" />
+                                            </svg>
+                                        </button>
 
                     </div>
                 

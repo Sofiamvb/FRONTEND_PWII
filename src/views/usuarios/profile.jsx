@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
-import clienteAxios from "../../config/axios";
+import * as usuariosService from "../../services/usuariosService";
 import Swal from 'sweetalert2';
 import FotoPerfil from '../../componentes/fotoPerfil';
 
@@ -23,14 +23,49 @@ export default function Profile(props) {
     const idUsuario = sessionStorage.getItem('id');
 
     const consultarAPI = async () => {
-        const usuarioConsulta = await clienteAxios.get(`/useresInfo/${idUsuario}`);
-        datosUsuario(usuarioConsulta.data);
+        const usuarioConsulta = await usuariosService.obtenerUsuario(idUsuario);
+        datosUsuario(usuarioConsulta);
     }
 
     useEffect(() => {
         consultarAPI();
 
     }, [])
+
+    // Que mostrar en la esquina de la portada segun como vaya la verificacion.
+    // Si no se ha enviado (o se rechazo) se le da un boton para hacerlo.
+    const insigniaVerificacion = () => {
+
+        const estado = usuario.verificacion ? usuario.verificacion.estado : 'sin enviar';
+
+        if (estado === 'aprobado') {
+            return (
+                <div className="rounded-full bg-[#b6e7c9]/70 px-5 py-2 text-xs font-bold text-[#2f7a52] backdrop-blur-sm shadow-sm">
+                    Cuenta verificada
+                </div>
+            );
+        }
+
+        if (estado === 'pendiente') {
+            return (
+                <div className="rounded-full bg-[#83cbfc]/40 px-5 py-2 text-xs font-bold text-[#3a81a6] backdrop-blur-sm shadow-sm">
+                    Verificación en proceso
+                </div>
+            );
+        }
+
+        // 'sin enviar' y 'rechazado': se puede mandar (o volver a mandar) la documentacion
+        return (
+            <button
+                type="button"
+                onClick={() => navigate('/auth/verification')}
+                className="rounded-full bg-[#1f1f22] px-5 py-2 text-xs font-bold text-white shadow-sm
+                transition-colors hover:bg-[#3a3940]"
+            >
+                {estado === 'rechazado' ? 'Verificación rechazada, reintentar' : 'Verificar mi cuenta'}
+            </button>
+        );
+    }
 
     //Leer datos del formulario
     const actualizarState = e => {
@@ -45,13 +80,21 @@ export default function Profile(props) {
     }
 
     //Enviar peticion para actualizar el cliente
-    const actualizarUsuario = e => {
+    // Antes solo hacia console.log: si se guardaba o fallaba (p. ej. un campo vacio)
+    // la pantalla no decia nada y parecia que no se editaba
+    const actualizarUsuario = async e => {
         e.preventDefault();
-        clienteAxios.put(`/users/${idUsuario}`, usuario)
-            .then(res => {
-                console.log(res);
-            })
-
+        try {
+            const res = await usuariosService.actualizarUsuario(idUsuario, usuario);
+            Swal.fire({ icon: 'success', title: 'Perfil actualizado', text: res.mensaje });
+        } catch (error) {
+            console.log(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo actualizar',
+                text: error.response?.data?.mensaje || 'Vuelve a intentar'
+            });
+        }
     }
 
     // Cuando se sube una foto nueva, la guardamos en el state para que se vea al momento
@@ -62,13 +105,24 @@ export default function Profile(props) {
         });
     }
 
-    const actualizarPassword = e => {
+    const actualizarPassword = async e => {
         e.preventDefault();
-        clienteAxios.put(`/users/password/${idUsuario}`, usuario)
-            .then(res => {
-                console.log(res);
-            })
+        const formulario = e.target;
+        try {
+            const res = await usuariosService.cambiarPassword(idUsuario, usuario);
+            Swal.fire({ icon: 'success', title: 'Contraseña actualizada', text: res.mensaje });
 
+            // Se limpian los tres campos para que no se queden escritos
+            formulario.reset();
+            datosUsuario({ ...usuario, passwordActual: '', password: '', passwordRepetida: '' });
+        } catch (error) {
+            console.log(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo cambiar la contraseña',
+                text: error.response?.data?.mensaje || 'Vuelve a intentar'
+            });
+        }
     }
 
     return (
@@ -83,9 +137,7 @@ export default function Profile(props) {
 
 
                         <div className="absolute right-6 bottom-4 sm:right-6 sm:bottom-6">
-                            <div className="rounded-full bg-[#83cbfc]/40 px-5 py-2 text-xs font-bold text-[#3a81a6] backdrop-blur-sm shadow-sm">
-                                Verificación en proceso
-                            </div>
+                            {insigniaVerificacion()}
                         </div>
 
                         <div className="absolute -bottom-12 left-8 sm:left-12 flex h-36 w-36 items-center justify-center overflow-hidden rounded-full border-8 border-[#FBFAF5] bg-[#FBFAF5] shadow-sm">
@@ -129,8 +181,8 @@ export default function Profile(props) {
                     </div>
 
                     <div className="-mt-22 mb-20 pl-48 sm:pl-52">
-                        <h1 className="text-3xl font-extrabold text-[#1f1f22]">Usuario</h1>
-                        <p className="mt-1 text-sm font-medium text-gray-500">FCFM/UANL</p>
+                        <h1 className="text-3xl font-extrabold text-[#1f1f22]">{usuario.name}</h1>
+                        <p className="mt-1 text-sm font-medium text-gray-500">{usuario.carrera}</p>
                     </div>
                     <form onSubmit={actualizarUsuario} className="flex flex-col gap-6">
 

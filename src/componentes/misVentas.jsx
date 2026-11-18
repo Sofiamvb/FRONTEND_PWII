@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { obtenerRutaArchivo } from '../helpers/imagenes';
+import { textoEstadoPedido } from '../helpers/estadoPedido';
 
 export default function MisVentas({ venta }) {
 
@@ -8,7 +9,8 @@ export default function MisVentas({ venta }) {
     // El snapshot guarda el nombre del archivo de la imagen principal al momento de la compra
     const rutaImagen = obtenerRutaArchivo(imagen);
 
-    const { comprador, _id } = venta;
+    // estado_pago es el estado real del pedido; antes decia "Entregado" fijo
+    const { comprador, _id, estado_pago } = venta;
 
     return (
         <>
@@ -88,7 +90,7 @@ export default function MisVentas({ venta }) {
                     font-medium
                     shadow-[0_2px_5px_rgba(0,0,0,0.14)]"
                 >
-                    Entregado
+                    {textoEstadoPedido(estado_pago)}
                 </div>
 
             </div>

@@ -1,10 +1,55 @@
 import { Link } from 'react-router-dom'
 import { Outlet } from 'react-router-dom'
 import { useNavigate } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
+import { useState } from "react";
 
 export default function Layout() {
 
     const navigate = useNavigate();
+
+    // El texto que se busca vive en la URL (/home?buscar=...) y el home lo lee.
+    // Asi funciona desde cualquier pantalla y convive con los demas filtros.
+    const [searchParams] = useSearchParams();
+    const textoEnLaUrl = searchParams.get('buscar') || '';
+
+    const [busqueda, guardarBusqueda] = useState(textoEnLaUrl);
+
+    // Si la URL cambia desde fuera (por ejemplo con "Limpiar filtros" del home),
+    // la caja de texto se pone al corriente. Se compara contra el valor anterior
+    // en vez de usar un useEffect, que provocaria un render de mas.
+    const [urlAnterior, guardarUrlAnterior] = useState(textoEnLaUrl);
+
+    if (textoEnLaUrl !== urlAnterior) {
+        guardarUrlAnterior(textoEnLaUrl);
+        guardarBusqueda(textoEnLaUrl);
+    }
+
+    // Cambia solo el parametro "buscar" y respeta los filtros que ya estaban puestos
+    const irABuscar = texto => {
+
+        const parametros = new URLSearchParams(searchParams);
+
+        if (texto === '') {
+            parametros.delete('buscar');
+        } else {
+            parametros.set('buscar', texto);
+        }
+
+        const cadena = parametros.toString();
+
+        navigate(cadena === '' ? '/home' : `/home?${cadena}`);
+    }
+
+    const buscarProductos = e => {
+        e.preventDefault();
+        irABuscar(busqueda.trim());
+    }
+
+    const limpiarBusqueda = () => {
+        guardarBusqueda('');
+        irABuscar('');
+    }
 
     function logout() {
 
@@ -19,20 +64,38 @@ export default function Layout() {
             <header className="fixed top-0 left-0 right-0 h-[60px] bg-[#252429] z-50 flex items-center">
 
 
-                <div className="w-[52px] h-full flex items-center justify-center text-white">Logo</div>
+                <div className="w-[65px] h-full flex items-center justify-center">
+                    <img src="/img/UniMarket.png" alt="UniMarket" className="h-8 w-auto" />
+                </div>
 
 
                 <div className="absolute left-1/2 -translate-x-1/2">
-                    <div className="w-[450px] h-[40px] rounded-full border border-[#5A585D] bg-[#302F34] flex items-center px-4">
+                    <form
+                        onSubmit={buscarProductos}
+                        className="w-[150px] sm:w-[260px] md:w-[360px] lg:w-[450px] h-[40px] rounded-full border border-[#5A585D] bg-[#302F34] flex items-center px-4">
                         <input
                             type="text"
                             placeholder="Buscar"
+                            value={busqueda}
+                            onChange={e => guardarBusqueda(e.target.value)}
                             className="w-full bg-transparent outline-none text-sm text-white placeholder-[#8A888D]"
                         />
-                    </div>
+
+                        {
+                            busqueda !== '' && (
+                                <button
+                                    type="button"
+                                    onClick={limpiarBusqueda}
+                                    title="Borrar búsqueda"
+                                    className="ml-2 flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#5A585D] text-xs font-bold text-white transition-colors hover:bg-[#6d6b71]">
+                                    ✕
+                                </button>
+                            )
+                        }
+                    </form>
                 </div>
 
-                <div className="ml-auto flex items-center gap-4 pr-8">
+                <div className="ml-auto flex items-center gap-4 pr-3 sm:pr-8">
 
                     <Link
                         to="/home/profile"
@@ -57,9 +120,9 @@ export default function Layout() {
 
             </header>
 
-            <nav className="fixed left-0 top-[60px] bottom-0 w-[65px] bg-[#F8F7F0] z-40 flex flex-col">
+            <nav className="fixed left-0 top-[60px] bottom-0 w-[65px] bg-[#F8F7F0] z-40 flex flex-col items-center overflow-y-auto py-6">
 
-                <div className="flex flex-col items-center gap-[60px] pt-[60px] mt-10">
+                <div className="flex flex-col items-center gap-6 lg:gap-10">
 
                     <Link className="w-[40px] h-[40px] flex items-center justify-center"
                         to="/home"
@@ -110,34 +173,33 @@ export default function Layout() {
 
                     </Link>
 
-                    <div className='py-60'>
-                        <Link
-                            to="/home/reports?tipo=usuario"
-                            className="w-[40px] h-[40px] flex items-center justify-center mb-6">
-                            { /* Reportes */}
-                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path fillRule='evenodd' clipRule='evenodd' d="M27.5 26.25C24.9687 26.25 22.9167 28.302 22.9167 30.8333C22.9167 31.6673 23.1387 32.4485 23.5279 33.122L29.7887 26.8612C29.1152 26.472 28.334 26.25 27.5 26.25ZM31.5327 28.6527L25.3194 34.866C25.9677 35.2175 26.7102 35.4167 27.5 35.4167C30.0314 35.4167 32.0834 33.3647 32.0834 30.8333C32.0834 30.0435 31.8842 29.301 31.5327 28.6527ZM20.4167 30.8333C20.4167 26.9213 23.588 23.75 27.5 23.75C29.4817 23.75 31.2754 24.5655 32.5595 25.876C33.8102 27.1523 34.5834 28.9038 34.5834 30.8333C34.5834 34.7453 31.412 37.9167 27.5 37.9167C25.5705 37.9167 23.819 37.1435 22.5427 35.8928C21.2322 34.6087 20.4167 32.815 20.4167 30.8333Z" fill="#252429" />
-                                <path d="M26.6666 10.0002C26.6666 13.6821 23.6818 16.6668 20 16.6668C16.3181 16.6668 13.3333 13.6821 13.3333 10.0002C13.3333 6.31826 16.3181 3.3335 20 3.3335C23.6818 3.3335 26.6666 6.31826 26.6666 10.0002Z" fill="#252429" />
-                                <path d="M23.8252 21.9797C20.3562 23.4213 17.9167 26.8423 17.9167 30.8332C17.9167 33.027 18.6572 35.0523 19.8964 36.6665C6.66669 36.649 6.66669 33.2978 6.66669 29.1665C6.66669 25.0243 12.6362 21.6665 20 21.6665C21.3295 21.6665 22.6135 21.776 23.8252 21.9797Z" fill="#252429" />
-                            </svg>
-                        </Link>
+                </div>
 
-                        <button
-                            className="w-[40px] h-[40px] flex items-center justify-center py-12"
-                            onClick={logout}>
-                            { /* Logout */}
-                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path fillRule='evenodd' clipRule='evenodd' d="M26.875 20C26.875 19.3097 26.3153 18.75 25.625 18.75H7.33738L10.6051 15.9491C11.1293 15.4998 11.19 14.7107 10.7407 14.1865C10.2914 13.6624 9.50231 13.6017 8.97816 14.051L3.14483 19.051C2.86776 19.2884 2.70831 19.6352 2.70831 20C2.70831 20.3649 2.86776 20.7117 3.14483 20.949L8.97816 25.949C9.50231 26.3984 10.2914 26.3377 10.7407 25.8135C11.19 25.2894 11.1293 24.5002 10.6051 24.051L7.33738 21.25H25.625C26.3153 21.25 26.875 20.6904 26.875 20Z" fill="#252429" />
-                                <path d="M15.625 13.3335C15.625 14.5038 15.625 15.089 15.9059 15.5093C16.0275 15.6913 16.1837 15.8476 16.3658 15.9692C16.7862 16.2501 17.3713 16.2501 18.5417 16.2501H25.625C27.696 16.2501 29.375 17.929 29.375 20.0002C29.375 22.0712 27.696 23.7502 25.625 23.7502H18.5417C17.3713 23.7502 16.786 23.7502 16.3657 24.031C16.1837 24.1527 16.0275 24.3088 15.9059 24.4908C15.625 24.9112 15.625 25.4963 15.625 26.6668C15.625 31.3808 15.625 33.7378 17.0895 35.2023C18.554 36.6668 20.9107 36.6668 25.6247 36.6668H27.2913C32.0053 36.6668 34.3623 36.6668 35.8268 35.2023C37.2913 33.7378 37.2913 31.3808 37.2913 26.6668V13.3335C37.2913 8.61946 37.2913 6.26243 35.8268 4.79796C34.3623 3.3335 32.0053 3.3335 27.2913 3.3335H25.6247C20.9107 3.3335 18.554 3.3335 17.0895 4.79796C15.625 6.26243 15.625 8.61945 15.625 13.3335Z" fill="#252429" />
-                            </svg>
+                {/* mt-auto los pega abajo, asi el logout se ve en cualquier alto de pantalla */}
+                <div className="mt-auto flex flex-col items-center gap-6 pt-8">
+                    <Link
+                        to="/home/reports?tipo=usuario"
+                        className="w-[40px] h-[40px] flex items-center justify-center">
+                        { /* Reportes */}
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fillRule='evenodd' clipRule='evenodd' d="M27.5 26.25C24.9687 26.25 22.9167 28.302 22.9167 30.8333C22.9167 31.6673 23.1387 32.4485 23.5279 33.122L29.7887 26.8612C29.1152 26.472 28.334 26.25 27.5 26.25ZM31.5327 28.6527L25.3194 34.866C25.9677 35.2175 26.7102 35.4167 27.5 35.4167C30.0314 35.4167 32.0834 33.3647 32.0834 30.8333C32.0834 30.0435 31.8842 29.301 31.5327 28.6527ZM20.4167 30.8333C20.4167 26.9213 23.588 23.75 27.5 23.75C29.4817 23.75 31.2754 24.5655 32.5595 25.876C33.8102 27.1523 34.5834 28.9038 34.5834 30.8333C34.5834 34.7453 31.412 37.9167 27.5 37.9167C25.5705 37.9167 23.819 37.1435 22.5427 35.8928C21.2322 34.6087 20.4167 32.815 20.4167 30.8333Z" fill="#252429" />
+                            <path d="M26.6666 10.0002C26.6666 13.6821 23.6818 16.6668 20 16.6668C16.3181 16.6668 13.3333 13.6821 13.3333 10.0002C13.3333 6.31826 16.3181 3.3335 20 3.3335C23.6818 3.3335 26.6666 6.31826 26.6666 10.0002Z" fill="#252429" />
+                            <path d="M23.8252 21.9797C20.3562 23.4213 17.9167 26.8423 17.9167 30.8332C17.9167 33.027 18.6572 35.0523 19.8964 36.6665C6.66669 36.649 6.66669 33.2978 6.66669 29.1665C6.66669 25.0243 12.6362 21.6665 20 21.6665C21.3295 21.6665 22.6135 21.776 23.8252 21.9797Z" fill="#252429" />
+                        </svg>
+                    </Link>
+
+                    <button
+                        className="w-[40px] h-[40px] flex items-center justify-center"
+                        onClick={logout}>
+                        { /* Logout */}
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path fillRule='evenodd' clipRule='evenodd' d="M26.875 20C26.875 19.3097 26.3153 18.75 25.625 18.75H7.33738L10.6051 15.9491C11.1293 15.4998 11.19 14.7107 10.7407 14.1865C10.2914 13.6624 9.50231 13.6017 8.97816 14.051L3.14483 19.051C2.86776 19.2884 2.70831 19.6352 2.70831 20C2.70831 20.3649 2.86776 20.7117 3.14483 20.949L8.97816 25.949C9.50231 26.3984 10.2914 26.3377 10.7407 25.8135C11.19 25.2894 11.1293 24.5002 10.6051 24.051L7.33738 21.25H25.625C26.3153 21.25 26.875 20.6904 26.875 20Z" fill="#252429" />
+                            <path d="M15.625 13.3335C15.625 14.5038 15.625 15.089 15.9059 15.5093C16.0275 15.6913 16.1837 15.8476 16.3658 15.9692C16.7862 16.2501 17.3713 16.2501 18.5417 16.2501H25.625C27.696 16.2501 29.375 17.929 29.375 20.0002C29.375 22.0712 27.696 23.7502 25.625 23.7502H18.5417C17.3713 23.7502 16.786 23.7502 16.3657 24.031C16.1837 24.1527 16.0275 24.3088 15.9059 24.4908C15.625 24.9112 15.625 25.4963 15.625 26.6668C15.625 31.3808 15.625 33.7378 17.0895 35.2023C18.554 36.6668 20.9107 36.6668 25.6247 36.6668H27.2913C32.0053 36.6668 34.3623 36.6668 35.8268 35.2023C37.2913 33.7378 37.2913 31.3808 37.2913 26.6668V13.3335C37.2913 8.61946 37.2913 6.26243 35.8268 4.79796C34.3623 3.3335 32.0053 3.3335 27.2913 3.3335H25.6247C20.9107 3.3335 18.554 3.3335 17.0895 4.79796C15.625 6.26243 15.625 8.61945 15.625 13.3335Z" fill="#252429" />
+                        </svg>
                             
                            
 
-                        </button>
-                    </div>
-
-
-
+                    </button>
                 </div>
             </nav>
 

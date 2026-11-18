@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import clienteAxios from "../../config/axios";
+import * as adminService from "../../services/adminService";
 import Swal from 'sweetalert2';
 import Transacciones from '../../componentes/transacciones';
 
@@ -9,9 +9,9 @@ export default function AdminTransacciones() {
 
     const consultarAPI = async () => {
         try {
-            const transaccionesConsulta = await clienteAxios.get('/admin/transacciones');
-            console.log(transaccionesConsulta.data);
-            guardarTransacciones(transaccionesConsulta.data);
+            const transaccionesConsulta = await adminService.obtenerTransacciones();
+            console.log(transaccionesConsulta);
+            guardarTransacciones(transaccionesConsulta);
         } catch (error) {
             console.log(error);
         }

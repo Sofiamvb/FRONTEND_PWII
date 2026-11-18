@@ -9,9 +9,11 @@ export default function LayoutLanding() {
                 <header className="flex w-full items-center justify-between px-8 py-6 md:px-16 lg:px-24">
 
 
-                    <div className="flex h-11 w-32 items-center justify-center rounded-full bg-[#e5e5e5] text-sm font-bold text-[#1f1f22]">
-                        Logo
-                    </div>
+                    <img
+                        src="/img/UniMarket.png"
+                        alt="UniMarket"
+                        className="h-12 w-auto md:h-14"
+                    />
 
 
                     <nav className="hidden gap-10 text-base font-bold md:flex">

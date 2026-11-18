@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import clienteAxios from '../../config/axios';
+import * as pedidosService from '../../services/pedidosService';
 import { Link, useParams } from "react-router-dom"
 import { obtenerRutaArchivo } from '../../helpers/imagenes';
-
-// Datos de la compra (más adelante puedes reemplazarlos por props o datos de tu API)
-const compra = {
-    carrera: "UANL - FIME",
-    estadoPago: "Liberado",
-    calificacion: 3,
-}
-
-const ESTRELLAS = [1, 2, 3, 4, 5]
+import Estrellas from '../../componentes/Estrellas';
+import Swal from 'sweetalert2';
 
 export default function PurchaseDetail() {
 
@@ -18,20 +11,93 @@ export default function PurchaseDetail() {
 
     const [datosPedido, guardarPedido] = useState(null);
 
+    // Calificacion que ya tiene la compra (null si todavia no la han calificado)
+    const [calificacion, guardarCalificacion] = useState(null);
+
+    // Estrellas que el comprador va eligiendo antes de enviar
+    const [estrellasElegidas, guardarEstrellasElegidas] = useState(0);
+
     console.log('Info:', datosPedido)
 
     const consultarAPI = async () => {
-        const pedidoConsulta = await clienteAxios.get(`/pedidos/${idPedido}`);
-        guardarPedido(pedidoConsulta.data);
+        const pedidoConsulta = await pedidosService.obtenerPedido(idPedido);
+        guardarPedido(pedidoConsulta);
+        guardarCalificacion(pedidoConsulta.calificacion);
     }
 
-    const actualizarPedido = e => {
-        e.preventDefault();
-        clienteAxios.put(`/pedidos/${idPedido}/cancelar`, datosPedido)
-            .then(res => {
-                console.log(res);
-            })
+    const enviarCalificacion = async e => {
 
+        e.preventDefault();
+
+        if (estrellasElegidas === 0) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Elige una calificación',
+                text: 'Toca las estrellas para calificar tu compra'
+            });
+            return;
+        }
+
+        try {
+
+            const res = await pedidosService.calificarPedido(idPedido, estrellasElegidas);
+
+            guardarCalificacion(res.calificacion);
+
+            Swal.fire({
+                icon: 'success',
+                title: '¡Gracias!',
+                text: res.mensaje
+            });
+
+        } catch (error) {
+            console.log(error);
+
+            const mensaje = error.response && error.response.data
+                ? error.response.data.mensaje
+                : 'Vuelve a intentar';
+
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo calificar',
+                text: mensaje
+            });
+        }
+    }
+
+    // Antes solo hacia console.log: no preguntaba, no avisaba y la pantalla seguia igual
+    const actualizarPedido = async e => {
+        e.preventDefault();
+
+        const confirmacion = await Swal.fire({
+            title: '¿Cancelar esta compra?',
+            text: 'Se te reembolsará el pago',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, cancelar',
+            cancelButtonText: 'No',
+            confirmButtonColor: '#E99597',
+            cancelButtonColor: '#D7D8DD'
+        });
+
+        if (!confirmacion.isConfirmed) {
+            return;
+        }
+
+        try {
+            const res = await pedidosService.cancelarPedido(idPedido, datosPedido);
+            Swal.fire({ icon: 'success', title: 'Compra cancelada', text: res.mensaje });
+
+            // Recargar para que se vea el estado nuevo (Reembolsado)
+            consultarAPI();
+        } catch (error) {
+            console.log(error);
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo cancelar',
+                text: error.response?.data?.mensaje || 'Vuelve a intentar'
+            });
+        }
     }
 
     useEffect(() => {
@@ -342,7 +408,7 @@ export default function PurchaseDetail() {
                                         </p>
 
                                         <p className="mt-[2px] text-[11px] font-medium text-[#8E8E8E]">
-                                            {compra.carrera}
+                                            {`${datosPedido.pedido.vendedor.institucion} - ${datosPedido.pedido.vendedor.carrera}`}
                                         </p>
 
                                     </div>
@@ -350,34 +416,44 @@ export default function PurchaseDetail() {
                                 </div>
 
 
-                                {/* ESTRELLAS */}
+                                {/* CALIFICACION: si ya calificó se muestra, si no se puede calificar */}
                                 <div className="flex shrink-0 items-center gap-3">
 
-                                    <div
-                                        className="flex items-center"
-                                        aria-label={`Calificación ${compra.calificacion} de 5`}
-                                    >
-                                        {ESTRELLAS.map((n) => (
-                                            <svg
-                                                key={n}
-                                                width="24"
-                                                height="24"
-                                                viewBox="0 0 24 24"
-                                                fill={n <= compra.calificacion ? "#000000" : "#D9D9D9"}
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-                                            </svg>
-                                        ))}
-                                    </div>
+                                    {
+                                        calificacion ? (
+                                            <>
+                                                <Estrellas valor={calificacion.puntuacion} />
 
-                                    <span className="text-[15px] font-extrabold text-[#252429]">
-                                        {compra.calificacion.toFixed(1)}
-                                    </span>
+                                                <span className="text-[15px] font-extrabold text-[#252429]">
+                                                    {calificacion.puntuacion.toFixed(1)}
+                                                </span>
+                                            </>
+                                        ) : (
+                                            <Estrellas
+                                                valor={estrellasElegidas}
+                                                onElegir={guardarEstrellasElegidas}
+                                            />
+                                        )
+                                    }
 
                                 </div>
 
                             </div>
+
+                            {/* Formulario para calificar, solo mientras no esté calificada */}
+                            {
+                                !calificacion && (
+                                    <form onSubmit={enviarCalificacion} className="mt-4 flex flex-col gap-3">
+
+                                        <button
+                                            type="submit"
+                                            className="self-start rounded-full bg-[#fae568] px-6 py-2.5 text-[14px] font-bold text-[#1f1f22] transition-colors hover:bg-[#f0dc59]">
+                                            Enviar calificación
+                                        </button>
+
+                                    </form>
+                                )
+                            }
 
                         </div>
 

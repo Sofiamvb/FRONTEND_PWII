@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import clienteAxios from '../../config/axios';
+import * as productosService from '../../services/productosService';
 import { Link, useParams } from "react-router-dom"
 import DisponibilidadProducto from '../../componentes/disponibilidadProducto';
 import Carrusel from '../../componentes/Carrusel';
@@ -24,8 +24,8 @@ export default function ProductDetail() {
 
 
     const consultarAPI = async () => {
-        const productoConsulta = await clienteAxios.get(`/productos/${idProducto}`);
-        guardarProducto(productoConsulta.data);
+        const productoConsulta = await productosService.obtenerProducto(idProducto);
+        guardarProducto(productoConsulta);
     }
 
     useEffect(() => {
@@ -144,7 +144,7 @@ export default function ProductDetail() {
                                     </h2>
 
                                     <p className="mt-2 text-[14px] font-medium text-[#9A9898]">
-                                        {producto.categoria.nombre_categoria}
+                                        {producto.categoria?.nombre_categoria || 'Sin categoría'}
                                     </p>
 
                                 </div>
@@ -173,7 +173,9 @@ export default function ProductDetail() {
                                     </h2>
 
                                     <p className="mt-2 text-[14px] font-medium text-[#9A9898]">
-                                        {`${producto.punto_encuentro.lugar}|${producto.punto_encuentro.zona}`}
+                                        {producto.punto_encuentro
+                                            ? `${producto.punto_encuentro.lugar}|${producto.punto_encuentro.zona}`
+                                            : 'Sin punto de encuentro'}
                                     </p>
 
                                 </div>
@@ -236,6 +238,7 @@ export default function ProductDetail() {
                             >
                                 {producto.nombre_produ}
                             </h1>
+
 
                             <p
                                 className="
@@ -344,11 +347,15 @@ export default function ProductDetail() {
                                     <div>
 
                                         <p className="text-[13px] font-extrabold text-[#252429]">
-                                            Maria Lopez
+                                            {producto.usuario
+                                                ? `${producto.usuario.name} ${producto.usuario.apellidoP}`
+                                                : ''}
                                         </p>
 
                                         <p className="mt-1 text-[10px] font-medium text-[#8E8E8E]">
-                                            UANL - FIME
+                                            {producto.usuario
+                                                ? `${producto.usuario.institucion} - ${producto.usuario.carrera}`
+                                                : ''}
                                         </p>
 
                                     </div>
@@ -373,7 +380,9 @@ export default function ProductDetail() {
 
 
                                     <span className="text-[25px] font-extrabold text-[#252429]">
-                                        4.5
+                                        {producto.usuario && producto.usuario.reputacion && producto.usuario.reputacion.totalValoraciones > 0
+                                            ? producto.usuario.reputacion.promedio
+                                            : '—'}
                                     </span>
 
                                 </div>

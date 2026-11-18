@@ -105,17 +105,18 @@ export default function EditProduct({ publicacion }) {
                         ${precio}
                     </p>
 
-                    <span className="
+                    <span className={`
                         rounded-full
-                        bg-[#DDF3E8]
                         px-[9px]
                         py-[4px]
                         text-[8px]
                         font-bold
-                        text-[#488669]
                         shadow-[0_1px_3px_rgba(0,0,0,0.12)]
-                    ">
-                        {/*disponibilidad || "Disponible"*/}
+                        ${disponibilidad
+                            ? 'bg-[#DDF3E8] text-[#488669]'
+                            : 'bg-[#F7DADA] text-[#A85A5C]'}
+                    `}>
+                        {disponibilidad ? 'Disponible' : 'No disponible'}
                     </span>
 
                 </div>
@@ -139,7 +140,7 @@ export default function EditProduct({ publicacion }) {
                     leading-[15px]
                     text-[#9A9898]
                 ">
-                    Estado: {/*condicion*/}
+                    Estado: {condicion}
                 </p>
 
                 {/* UBICACIÓN */}
@@ -151,7 +152,9 @@ export default function EditProduct({ publicacion }) {
                     leading-[15px]
                     text-[#9A9898]
                 ">
-                    {/*punto_encuentro?.nombre || "FCFM-Ciudad universitaria"*/}
+                    {punto_encuentro
+                        ? `${punto_encuentro.lugar} - ${punto_encuentro.zona}`
+                        : 'Sin punto de encuentro'}
                 </p>
 
                 {/* EDITAR */}

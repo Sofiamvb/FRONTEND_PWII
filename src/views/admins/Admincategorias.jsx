@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import clienteAxios from "../../config/axios";
+import * as categoriasService from "../../services/categoriasService";
 import Swal from 'sweetalert2';
 import Categroias from '../../componentes/categorias';
 
@@ -22,9 +22,9 @@ export default function CategoriasAdmin() {
 
     const consultarAPI = async () => {
         try {
-            const categoriaConsulta = await clienteAxios.get('/admin/categorias/mostrar');
-            console.log(categoriaConsulta.data);
-            guardarCategorias(categoriaConsulta.data);
+            const categoriaConsulta = await categoriasService.obtenerCategorias();
+            console.log(categoriaConsulta);
+            guardarCategorias(categoriaConsulta);
         } catch (error) {
             console.log(error);
         }
@@ -39,13 +39,13 @@ export default function CategoriasAdmin() {
         e.preventDefault();
         try {
 
-            const res = await clienteAxios.post('/admin/categorias', categoria);
+            const res = await categoriasService.crearCategoria(categoria);
 
             console.log(res);
 
             Swal.fire({
                 title: "¡Se ha registrado!",
-                text: res.data.mensaje,
+                text: res.mensaje,
                 icon: "success"
             });
 
@@ -70,11 +70,11 @@ export default function CategoriasAdmin() {
     const actualizarCategoria = async (id, nombre_categoria) => {
         try {
 
-            const res = await clienteAxios.put(`/admin/categorias/${id}`, { nombre_categoria });
+            const res = await categoriasService.actualizarCategoria(id, nombre_categoria);
 
             Swal.fire({
                 title: "¡Actualizada!",
-                text: res.data.mensaje,
+                text: res.mensaje,
                 icon: "success"
             });
 
@@ -113,11 +113,11 @@ export default function CategoriasAdmin() {
 
         try {
 
-            const res = await clienteAxios.delete(`/admin/categorias/${id}`);
+            const res = await categoriasService.eliminarCategoria(id);
 
             Swal.fire({
                 title: "¡Eliminada!",
-                text: res.data.mensaje,
+                text: res.mensaje,
                 icon: "success"
             });
 
@@ -127,10 +127,11 @@ export default function CategoriasAdmin() {
 
             console.log(error);
 
+            // Si alguna publicacion la usa, el backend no deja borrarla y dice cuantas son
             Swal.fire({
                 icon: 'error',
-                title: "Hubo un error",
-                text: 'Intente de nuevo'
+                title: "No se pudo eliminar",
+                text: error.response?.data?.mensaje || 'Intente de nuevo'
             });
 
         }

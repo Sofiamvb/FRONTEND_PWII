@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function Verificaciones({ usuario, cambiarEstadoVerificacion }) {
 
     // Campos del usuario que vienen del backend
@@ -55,20 +57,31 @@ export default function Verificaciones({ usuario, cambiarEstadoVerificacion }) {
             items-center
             gap-3"
         >
-            <button
-                className="
-                rounded-full
-                 bg-[#FFFDF8]
-                px-6
-                py-2
-                text-xs
-                font-bold
-                shadow-[0_2px_4px_rgba(0,0,0,0.25)]
-                transition-transform
-                hover:scale-105"
-            >
-                Descargar
-            </button>
+            {/* Abre el documento en una pagina aparte. Si el usuario todavia
+                no sube nada, no hay nada que ver y el boton no aparece. */}
+            {
+                documentoUrl && (
+                    <Link
+                        to={`/admin/documento/${documentoUrl}`}
+                        state={{
+                            nombreUsuario: `${name} ${apellidoP}`,
+                            tipoDocumento: tipoDocumento
+                        }}
+                        className="
+                        rounded-full
+                         bg-[#FFFDF8]
+                        px-6
+                        py-2
+                        text-xs
+                        font-bold
+                        shadow-[0_2px_4px_rgba(0,0,0,0.25)]
+                        transition-transform
+                        hover:scale-105"
+                    >
+                        Ver
+                    </Link>
+                )
+            }
 
             <button
                 type="button"

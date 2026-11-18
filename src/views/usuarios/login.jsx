@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom"
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import clienteAxios from "../../config/axios";
+import * as usuariosService from "../../services/usuariosService";
 import Swal from 'sweetalert2';
 
 export default function Login() {
@@ -29,11 +29,19 @@ export default function Login() {
     e.preventDefault();
     console.log(usuario)
     // enviar peticion
-    clienteAxios.post('/users/login', usuario)
+    usuariosService.login(usuario)
       .then(res => {
         console.log(res)
-        sessionStorage.setItem('id',res.data.id);
-        navigate('/auth/verification');
+        sessionStorage.setItem('token', res.token);
+        sessionStorage.setItem('id', res.id);
+        sessionStorage.setItem('rol', res.rol);
+        sessionStorage.setItem('verificacion', res.verificacion);
+
+        if (res.rol === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/home');
+        }
 
       })
       .catch(error => {
@@ -121,17 +129,6 @@ export default function Login() {
 
               </div>
             </div>
-
-
-            <div className="flex justify-center pt-1">
-              <label
-                htmlFor="contraseñaOlvidada"
-                className="cursor-pointer text-xs font-semibold text-[#5a8ec9] hover:underline"
-              >
-                ¿Olvidaste tu contraseña?
-              </label>
-            </div>
-
 
             <button
               type="submit"

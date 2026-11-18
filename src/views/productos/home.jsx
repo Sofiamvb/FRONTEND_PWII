@@ -1,20 +1,89 @@
 import React, { useEffect, useState } from 'react';
-import clienteAxios from '../../config/axios';
+import * as categoriasService from '../../services/categoriasService';
+import * as productosService from '../../services/productosService';
 import Products from "../../componentes/Products"
 import { Link } from "react-router-dom"
+import { useSearchParams } from "react-router-dom";
 
 export default function Home() {
 
     const [productos, guardarProductos] = useState([]);
+    const [categorias, guardarCategorias] = useState([]);
 
-    const consultarAPI = async () => {
-        const productosConsulta = await clienteAxios.get('/productos/home');
-        guardarProductos(productosConsulta.data);
+    // Todos los filtros viven en la URL: /home?buscar=arduino&categoria=Libros&precio_final=500
+    // Asi el buscador del header y estos filtros se entienden entre si,
+    // y limpiar es tan facil como quitarlos de la URL.
+    const [searchParams, setSearchParams] = useSearchParams();
+    const buscar = searchParams.get('buscar') || '';
+    const categoria = searchParams.get('categoria') || '';
+    const precioFinal = searchParams.get('precio_final') || '';
+
+    const hayFiltros = buscar !== '' || categoria !== '' || precioFinal !== '';
+
+    // Lo que se escribe en "Precio maximo" antes de aplicarlo
+    const [precioEscrito, guardarPrecioEscrito] = useState(precioFinal);
+
+    // Las categorias se traen de la base para que los nombres siempre coincidan
+    // con los que espera el backend (compara el nombre exacto)
+    useEffect(() => {
+
+        const consultarCategorias = async () => {
+            const respuesta = await categoriasService.obtenerCategorias();
+            guardarCategorias(respuesta);
+        }
+
+        consultarCategorias();
+
+    }, []);
+
+    // Se vuelve a consultar cada vez que cambia algun filtro
+    useEffect(() => {
+
+        const consultarAPI = async () => {
+            const productosConsulta = await productosService.obtenerProductosHome({
+                buscar,
+                categoria,
+                precio_final: precioFinal
+            });
+            guardarProductos(productosConsulta);
+        }
+
+        consultarAPI();
+
+    }, [buscar, categoria, precioFinal]);
+
+    // Agrega o quita un filtro de la URL sin tocar los demas
+    const cambiarFiltro = (nombre, valor) => {
+
+        const nuevos = new URLSearchParams(searchParams);
+
+        if (valor === '') {
+            nuevos.delete(nombre);
+        } else {
+            nuevos.set(nombre, valor);
+        }
+
+        setSearchParams(nuevos);
     }
 
-    useEffect(() => {
-        consultarAPI();
-    }, []);
+    // El precio se aplica al salir del campo o al dar Enter, no en cada tecla
+    const aplicarPrecio = () => {
+
+        const texto = precioEscrito.trim();
+
+        if (texto === '' || isNaN(Number(texto))) {
+            guardarPrecioEscrito('');
+            cambiarFiltro('precio_final', '');
+            return;
+        }
+
+        cambiarFiltro('precio_final', texto);
+    }
+
+    const limpiarFiltros = () => {
+        guardarPrecioEscrito('');
+        setSearchParams({});
+    }
 
     return (
         <>
@@ -26,8 +95,12 @@ export default function Home() {
 
                 <div className="mb-10 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
                     <div>
-                        <h1 className="text-4xl font-extrabold text-[#1f1f22]">Materiales disponibles</h1>
-                        <p className="mt-2 text-sm font-medium text-gray-600">8 resultados</p>
+                        <h1 className="text-4xl font-extrabold text-[#1f1f22]">
+                            {buscar ? `Resultados para "${buscar}"` : 'Materiales disponibles'}
+                        </h1>
+                        <p className="mt-2 text-sm font-medium text-gray-600">
+                            {productos.length === 1 ? '1 resultado' : `${productos.length} resultados`}
+                        </p>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-6">
@@ -36,11 +109,20 @@ export default function Home() {
                         <div className="flex items-center gap-3">
                             <label className="text-sm font-bold text-[#1f1f22]">Categoría</label>
                             <div className="relative">
-                                <select className="appearance-none rounded-full border border-gray-100 bg-white py-2.5 pl-5 pr-10 text-sm text-gray-500 shadow-[0_2px_10px_rgba(0,0,0,0.04)] outline-none focus:border-gray-300">
-                                    <option>Seleccionar</option>
-                                    <option>Electrónica</option>
-                                    <option>Escolar</option>
-                                    <option>Tecnología</option>
+                                <select
+                                    value={categoria}
+                                    onChange={e => cambiarFiltro('categoria', e.target.value)}
+                                    className="appearance-none rounded-full border border-gray-100 bg-white py-2.5 pl-5 pr-10 text-sm text-gray-500 shadow-[0_2px_10px_rgba(0,0,0,0.04)] outline-none focus:border-gray-300">
+                                    <option value="">Todas</option>
+                                    {
+                                        categorias.map(unaCategoria => (
+                                            <option
+                                                key={unaCategoria._id}
+                                                value={unaCategoria.nombre_categoria}>
+                                                {unaCategoria.nombre_categoria}
+                                            </option>
+                                        ))
+                                    }
                                 </select>
 
                                 <div className="pointer-events-none absolute right-4 top-1/2 flex h-3 w-3 -translate-y-1/2 items-center justify-center">
@@ -60,11 +142,25 @@ export default function Home() {
                                     id="buscarprecio"
                                     name="buscarPrecio"
                                     placeholder="Precio"
+                                    value={precioEscrito}
+                                    onChange={e => guardarPrecioEscrito(e.target.value)}
+                                    onBlur={aplicarPrecio}
+                                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); aplicarPrecio(); } }}
                                     className="appearance-none rounded-full border border-gray-100 bg-white py-2.5 pl-5 pr-10 text-sm text-gray-500 shadow-[0_2px_10px_rgba(0,0,0,0.04)] outline-none focus:border-gray-300" />
 
                             </div>
                         </div>
 
+                        {
+                            hayFiltros && (
+                                <button
+                                    type="button"
+                                    onClick={limpiarFiltros}
+                                    className="rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-bold text-[#1f1f22] shadow-[0_2px_10px_rgba(0,0,0,0.04)] transition-colors hover:bg-gray-50">
+                                    Limpiar filtros
+                                </button>
+                            )
+                        }
 
                     </div>
                 </div>
@@ -87,6 +183,14 @@ export default function Home() {
                         }
 
                     </div>
+
+                    {
+                        productos.length === 0 && (
+                            <p className="mt-10 text-center text-sm font-medium text-gray-500">
+                                No encontramos materiales con esos filtros.
+                            </p>
+                        )
+                    }
                 </div>
 
             </div>

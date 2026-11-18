@@ -1,4 +1,5 @@
 import { createBrowserRouter } from 'react-router-dom'
+import RutaProtegida from './componentes/RutaProtegida'
 //USERS
 import Layout from './layouts/Layout'
 import LayoutAuth from './layouts/LayoutAuth'
@@ -30,6 +31,8 @@ import Admintransacciones from './views/admins/Admintransacciones'
 import AdminReportes from './views/admins/Adminreportes'
 import Adminusuarios from './views/admins/Adminusuarios'
 import Adminverificacion from './views/admins/Adminverificacion'
+import Admindocumento from './views/admins/Admindocumento'
+import Adminreporte from './views/admins/Adminreporte'
 
 export const router = createBrowserRouter([
     
@@ -55,7 +58,7 @@ export const router = createBrowserRouter([
     },
     {
         path: 'home',
-        element: <Layout />,
+        element: <RutaProtegida rol="estudiante"><Layout /></RutaProtegida>,
         children: [
             {
                 index: true,
@@ -118,14 +121,14 @@ export const router = createBrowserRouter([
             },
             {
                 path: 'verification',
-                element: <Verification />
+                element: <RutaProtegida><Verification /></RutaProtegida>
             }
 
         ]
     },
    {
             path: 'admin',
-            element: <LayoutAdmin />,
+            element: <RutaProtegida rol="admin"><LayoutAdmin /></RutaProtegida>,
             children: [
                 {
                     index: true,
@@ -158,6 +161,16 @@ export const router = createBrowserRouter([
                 {
                     path:'Adminreportes',
                     element: <AdminReportes />
+                },
+                {
+                    // Ver el documento que subio un usuario para verificarse
+                    path:'documento/:archivo',
+                    element: <Admindocumento />
+                },
+                {
+                    // Detalle de un reporte
+                    path:'reporte/:idReporte',
+                    element: <Adminreporte />
                 }
 
             ]

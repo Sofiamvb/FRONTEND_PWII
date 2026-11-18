@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from "react-router-dom";
-import clienteAxios from "../../config/axios";
+import * as reportesService from "../../services/reportesService";
+import * as productosService from "../../services/productosService";
+import * as pedidosService from "../../services/pedidosService";
 import Swal from 'sweetalert2';
 import MostrarReporte from '../../componentes/mostrarReportes';
 import BuscadorUsuario from '../../componentes/buscadorUsuario';
@@ -133,10 +135,10 @@ export default function Reports() {
     // Traer los reportes que ha hecho el usuario
     const consultarAPI = async () => {
         try {
-            const res = await clienteAxios.get(`/productos/reportes/usuario/${idUsuario}`);
-            console.log(res.data);
-            // El backend responde { mensaje, reportes }, por eso usamos res.data.reportes
-            guardarMisReportes(res.data.reportes);
+            const res = await reportesService.obtenerMisReportes(idUsuario);
+            console.log(res);
+            // El backend responde { mensaje, reportes }, por eso usamos res.reportes
+            guardarMisReportes(res.reportes);
         } catch (error) {
             console.log(error);
         }
@@ -145,8 +147,8 @@ export default function Reports() {
     // Traer el producto que se va a reportar (?tipo=producto)
     const consultarProducto = async () => {
         try {
-            const res = await clienteAxios.get(`/productos/${id}`);
-            guardarProducto(res.data);
+            const res = await productosService.obtenerProducto(id);
+            guardarProducto(res);
         } catch (error) {
             console.log(error);
         }
@@ -155,9 +157,9 @@ export default function Reports() {
     // Traer la compra que se va a reportar (?tipo=compra)
     const consultarPedido = async () => {
         try {
-            const res = await clienteAxios.get(`/pedidos/${id}`);
+            const res = await pedidosService.obtenerPedido(id);
             // El backend responde { mensaje, pedido }
-            guardarPedido(res.data.pedido);
+            guardarPedido(res.pedido);
         } catch (error) {
             console.log(error);
         }
@@ -200,27 +202,27 @@ export default function Reports() {
             return;
         }
 
-        // Endpoint según el tipo
-        let url = '/reportes';
-
-        if (tipo === 'producto') {
-            url = `/productos/${id}/reportar`;
-        }
-
-        if (tipo === 'compra') {
-            url = `/reportes/compra/${id}`;
-        }
+        const datos = {
+            ...reporte,
+            usuario_reporte: idUsuario
+        };
 
         try {
 
-            const res = await clienteAxios.post(url, {
-                ...reporte,
-                usuario_reporte: idUsuario
-            });
+            // Cada tipo de reporte tiene su propio endpoint
+            let res;
+
+            if (tipo === 'producto') {
+                res = await reportesService.reportarProducto(id, datos);
+            } else if (tipo === 'compra') {
+                res = await reportesService.reportarCompra(id, datos);
+            } else {
+                res = await reportesService.reportarUsuario(datos);
+            }
 
             Swal.fire({
                 title: "¡Reporte enviado!",
-                text: res.data.mensaje,
+                text: res.mensaje,
                 icon: "success"
             });
 

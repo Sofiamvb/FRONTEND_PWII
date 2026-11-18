@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import clienteAxios from '../../config/axios';
+import * as categoriasService from '../../services/categoriasService';
+import * as productosService from '../../services/productosService';
 import { Link } from "react-router-dom"
 import EditProduct from "../../componentes/EditProduct"
 
@@ -7,14 +8,39 @@ export default function Publications() {
 
     const [productosPublicados, guardarProductosPublicados] = useState([]);
 
-    const consultarAPI = async () => {
-        const productosConsulta = await clienteAxios.get('/productos/home');
-        guardarProductosPublicados(productosConsulta.data);
-    }
+    // Las categorias se traen de la base para que las opciones no queden escritas a mano
+    const [categorias, guardarCategorias] = useState([]);
+
+    // El id de la categoria elegida ('' = todas)
+    const [categoria, guardarCategoria] = useState('');
 
     useEffect(() => {
-        consultarAPI();
+
+        const consultarCategorias = async () => {
+            const respuesta = await categoriasService.obtenerCategorias();
+            guardarCategorias(respuesta);
+        }
+
+        consultarCategorias();
+
     }, []);
+
+    // Antes se pedia /productos/home, que trae los de TODOS los usuarios.
+    // Esta pantalla es "Mis publicaciones", asi que va solo por las propias.
+    // Este endpoint filtra por el ID de la categoria, no por el nombre.
+    useEffect(() => {
+
+        const consultarAPI = async () => {
+            const idUsuario = sessionStorage.getItem('id');
+
+            const productosConsulta = await productosService.obtenerProductosUsuario(idUsuario, categoria);
+
+            guardarProductosPublicados(productosConsulta.publicaciones);
+        }
+
+        consultarAPI();
+
+    }, [categoria]);
 
     return (
         <>
@@ -42,7 +68,8 @@ export default function Publications() {
                             <div className="relative">
 
                                 <select
-                                    defaultValue=""
+                                    value={categoria}
+                                    onChange={e => guardarCategoria(e.target.value)}
                                     className="
                                         min-w-[165px]
                                         appearance-none
@@ -59,14 +86,19 @@ export default function Publications() {
                                         outline-none
                                     "
                                 >
-                                    <option value="" disabled>
-                                        Seleccionar
+                                    <option value="">
+                                        Todas
                                     </option>
 
-                                    <option>Electrónica</option>
-                                    <option>Tecnología</option>
-                                    <option>Escolar</option>
-                                    <option>Accesorios</option>
+                                    {
+                                        categorias.map(unaCategoria => (
+                                            <option
+                                                key={unaCategoria._id}
+                                                value={unaCategoria._id}>
+                                                {unaCategoria.nombre_categoria}
+                                            </option>
+                                        ))
+                                    }
                                 </select>
 
                                 {/* FLECHA */}
@@ -139,6 +171,16 @@ export default function Publications() {
                     ))}
 
                 </div>
+
+                {
+                    productosPublicados.length === 0 && (
+                        <p className="mt-10 text-sm font-medium text-gray-500">
+                            {categoria === ''
+                                ? 'Todavía no tienes publicaciones.'
+                                : 'No tienes publicaciones en esa categoría.'}
+                        </p>
+                    )
+                }
 
             </div>
         </>

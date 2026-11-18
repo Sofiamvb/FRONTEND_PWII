@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import clienteAxios from "../../config/axios";
+import * as usuariosService from "../../services/usuariosService";
 import Swal from 'sweetalert2';
 
 export default function Register() {
@@ -34,17 +34,24 @@ export default function Register() {
 
         e.preventDefault();
         // enviar peticion
-        clienteAxios.post('/users', usuario)
+        usuariosService.registrarUsuario(usuario)
             .then(res => {
                 console.log(res)
 
+                // Se guarda el id para que la pantalla de verificacion sepa quien es
+                sessionStorage.setItem('token', res.token);
+                sessionStorage.setItem('id', res.id);
+                sessionStorage.setItem('rol', res.rol);
+                sessionStorage.setItem('verificacion', 'sin enviar');
+
                 Swal.fire({
                     title: "Se ha registrado!",
-                    text: res.data.mensaje,
+                    text: res.mensaje,
                     icon: "success"
                 });
 
-                navigate('/auth');
+                // Al registrarse si se le ofrece verificarse, pero puede omitirlo
+                navigate('/auth/verification');
 
             })
             .catch(error => {

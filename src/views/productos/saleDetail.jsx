@@ -1,7 +1,9 @@
 
 import React, { useEffect, useState } from 'react';
-import clienteAxios from '../../config/axios';
-import { Link, useParams } from "react-router-dom";
+import * as productosService from '../../services/productosService';
+import * as categoriasService from '../../services/categoriasService';
+import * as puntosService from '../../services/puntosService';
+import { Link, useParams, useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
 import Carrusel from '../../componentes/Carrusel';
 
@@ -64,6 +66,55 @@ export default function SaleDetail() {
 
     const { idProducto } = useParams();
 
+    const navigate = useNavigate();
+
+    // Eliminar la publicacion. No se puede deshacer, por eso se pregunta antes.
+    // El backend revisa que quien borra sea el dueño del producto.
+    const eliminarPublicacion = async () => {
+
+        const confirmacion = await Swal.fire({
+            title: '¿Eliminar esta publicación?',
+            text: 'Esta acción no se puede deshacer',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            confirmButtonColor: '#E99597',
+            cancelButtonColor: '#D7D8DD'
+        });
+
+        if (!confirmacion.isConfirmed) {
+            return;
+        }
+
+        try {
+
+            const res = await productosService.eliminarProducto(idProducto);
+
+            await Swal.fire({
+                icon: 'success',
+                title: 'Publicación eliminada',
+                text: res.mensaje
+            });
+
+            // Ya no existe el producto, asi que se regresa a la lista
+            navigate('/home/publications');
+
+        } catch (error) {
+            console.log(error);
+
+            const mensaje = error.response && error.response.data
+                ? error.response.data.mensaje
+                : 'Vuelve a intentar';
+
+            Swal.fire({
+                icon: 'error',
+                title: 'No se pudo eliminar',
+                text: mensaje
+            });
+        }
+    }
+
     const [producto, guardarProducto] = useState({
 
         nombre_produ: '',
@@ -88,12 +139,10 @@ export default function SaleDetail() {
         try {
 
             const categoriasConsulta =
-                await clienteAxios.get(
-                    '/admin/categorias/mostrar'
-                );
+                await categoriasService.obtenerCategorias();
 
             guardarCategoria(
-                categoriasConsulta.data
+                categoriasConsulta
             );
 
         } catch (error) {
@@ -112,12 +161,10 @@ export default function SaleDetail() {
         try {
 
             const consultarAPIpunto =
-                await clienteAxios.get(
-                    '/admin/puntos'
-                );
+                await puntosService.obtenerPuntos();
 
             guardarPunto(
-                consultarAPIpunto.data
+                consultarAPIpunto
             );
 
         } catch (error) {
@@ -136,17 +183,15 @@ export default function SaleDetail() {
         try {
 
             const consultaProducto =
-                await clienteAxios.get(
-                    `/productos/${idProducto}`
-                );
+                await productosService.obtenerProducto(idProducto);
 
             console.log(
                 'informacion producto',
-                consultaProducto.data
+                consultaProducto
             );
 
             guardarProducto(
-                consultaProducto.data
+                consultaProducto
             );
 
         } catch (error) {
@@ -268,6 +313,12 @@ export default function SaleDetail() {
                 ? punto_encuentro?._id || ''
                 : punto_encuentro || '';
 
+        // Los puntos desactivados por el admin no se ofrecen,
+        // salvo el que el producto ya tiene (para que no se vea vacio)
+        const disponibles = opciones.filter(opcion =>
+            opcion.estado !== false || opcion._id === valorPunto
+        );
+
         return (
 
             <div className="relative">
@@ -293,7 +344,7 @@ export default function SaleDetail() {
                         {placeholder}
                     </option>
 
-                    {opciones.map((opcion) => (
+                    {disponibles.map((opcion) => (
 
                         <option
                             key={opcion._id}
@@ -377,6 +428,34 @@ export default function SaleDetail() {
 
         e.preventDefault();
 
+        // La categoria y el punto llegan populados ({ _id, ... }), como texto si se
+        // cambiaron en el select, o en null si el admin los borro
+        const idDe = valor => (valor && typeof valor === 'object') ? valor._id : valor;
+
+        // El form usa noValidate: si faltaba algo el navegador bloqueaba el envio
+        // con un globito en ingles junto al campo, y parecia que "no se editaba"
+        const faltantes = [];
+
+        if (!String(producto.nombre_produ || '').trim()) faltantes.push('el nombre');
+        if (!producto.precio) faltantes.push('el precio');
+        if (!idDe(producto.categoria)) faltantes.push('la categoría');
+        if (!producto.condicion) faltantes.push('el estado');
+        if (!idDe(producto.punto_encuentro)) faltantes.push('la ubicación');
+
+        if (faltantes.length > 0) {
+            // "el nombre, el precio y la categoría"
+            const lista = faltantes.length > 1
+                ? `${faltantes.slice(0, -1).join(', ')} y ${faltantes[faltantes.length - 1]}`
+                : faltantes[0];
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Faltan datos',
+                text: `Elige ${lista} antes de guardar.`
+            });
+            return;
+        }
+
         const formData = new FormData();
 
         formData.append(
@@ -396,9 +475,7 @@ export default function SaleDetail() {
 
         formData.append(
             'categoria',
-            typeof producto.categoria === 'object'
-                ? producto.categoria._id
-                : producto.categoria
+            idDe(producto.categoria)
         );
 
         formData.append(
@@ -408,9 +485,7 @@ export default function SaleDetail() {
 
         formData.append(
             'punto_encuentro',
-            typeof producto.punto_encuentro === 'object'
-                ? producto.punto_encuentro._id
-                : producto.punto_encuentro
+            idDe(producto.punto_encuentro)
         );
 
         formData.append(
@@ -434,16 +509,7 @@ export default function SaleDetail() {
         try {
 
             const res =
-                await clienteAxios.put(
-                    `/productos/${idProducto}`,
-                    formData,
-                    {
-                        headers: {
-                            'Content-Type':
-                                'multipart/form-data'
-                        }
-                    }
-                );
+                await productosService.actualizarProducto(idProducto, formData);
 
             console.log(res);
 
@@ -462,14 +528,14 @@ export default function SaleDetail() {
 
             console.log(error);
 
-
             Swal.fire({
 
                 icon: 'error',
 
-                title: "Hubo un error",
+                title: "No se pudo guardar",
 
-                text: 'Vuelve a intentar'
+                // El backend dice por que (p. ej. "Los datos del producto no son validos")
+                text: error.response?.data?.mensaje || 'Vuelve a intentar'
 
             });
 
@@ -575,7 +641,7 @@ export default function SaleDetail() {
 
                 </div>
 
-                <form onSubmit={editarProducto}>
+                <form onSubmit={editarProducto} noValidate>
 
                     <div
                         className="
@@ -1087,6 +1153,8 @@ export default function SaleDetail() {
 
                                 <button
                                     type="button"
+
+                                    onClick={eliminarPublicacion}
 
                                     className="
                                     mt-6

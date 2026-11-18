@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import clienteAxios from "../../config/axios";
+import * as adminService from "../../services/adminService";
 import Swal from 'sweetalert2';
 import UsuariosVerificaciones from '../../componentes/consultaUsuariosVerificados';
 
@@ -9,9 +9,9 @@ export default function UsuariosAdmin() {
 
     const consultarAPI = async () => {
         try {
-            const usuariosVerificadosConsulta = await clienteAxios.get('/admin/mostrarTodasVerificaciones');
-            console.log(usuariosVerificadosConsulta.data);
-            guardarUsuariosVerificados(usuariosVerificadosConsulta.data);
+            const usuariosVerificadosConsulta = await adminService.obtenerTodasVerificaciones();
+            console.log(usuariosVerificadosConsulta);
+            guardarUsuariosVerificados(usuariosVerificadosConsulta);
         } catch (error) {
             console.log(error);
         }
@@ -21,11 +21,11 @@ export default function UsuariosAdmin() {
     const actualizarUsuarioStatus = async (id) => {
         try {
 
-            const res = await clienteAxios.put(`/admin/usuarios/${id}/suspender`);
+            const res = await adminService.suspenderUsuario(id);
 
             Swal.fire({
                 title: "¡Suspendido!",
-                text: res.data.mensaje,
+                text: res.mensaje,
                 icon: "success"
             });
 

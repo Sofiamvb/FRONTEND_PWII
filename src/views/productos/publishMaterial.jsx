@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import clienteAxios from "../../config/axios";
+import * as categoriasService from "../../services/categoriasService";
+import * as puntosService from "../../services/puntosService";
+import * as productosService from "../../services/productosService";
+import { validarProducto, soloDigitos, soloPrecio } from '../../helpers/validarProducto'
 import Swal from 'sweetalert2';
 
 const campo = `
@@ -136,13 +139,13 @@ export default function PublishMaterial() {
     const [puntos, guardarPunto] = useState([]);
 
     const consultarAPIcategoria = async () => {
-        const categoriasConsulta = await clienteAxios.get('/admin/categorias/mostrar');
-        guardarCategoria(categoriasConsulta.data);
+        const categoriasConsulta = await categoriasService.obtenerCategorias();
+        guardarCategoria(categoriasConsulta);
     }
 
     const consultarAPIpunto = async () => {
-        const consultarAPIpunto = await clienteAxios.get('/admin/puntos');
-        guardarPunto(consultarAPIpunto.data);
+        const consultarAPIpunto = await puntosService.obtenerPuntos();
+        guardarPunto(consultarAPIpunto);
     }
 
     useEffect(() => {
@@ -171,10 +174,22 @@ export default function PublishMaterial() {
 
     const leerInformacionProducto = e => {
 
+        const campo = e.target.name;
+        let valor = e.target.value;
+
+        // Estos dos campos son numericos: no se dejan teclear letras
+        if (campo === 'precio') {
+            valor = soloPrecio(valor);
+        }
+
+        if (campo === 'stock') {
+            valor = soloDigitos(valor);
+        }
+
         guardarProducto({
             //Obtiene una copia del state
             ...producto,
-            [e.target.name]: e.target.value
+            [campo]: valor
         })
         console.log(producto)
         console.log(archivo)
@@ -189,6 +204,23 @@ export default function PublishMaterial() {
 
         e.preventDefault();
         console.log(producto)
+
+        // Se revisa todo antes de armar el formData
+        const errores = validarProducto(producto, archivo);
+
+        if (errores.length > 0) {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Revisa los datos del producto',
+                // Se listan todos juntos para no corregir de uno en uno
+                html: '<ul style="text-align:left; margin:0; padding-left:20px">' +
+                    errores.map(error => `<li>${error}</li>`).join('') +
+                    '</ul>'
+            });
+
+            return;
+        }
 
         //crear un formData
         const formData = new FormData();
@@ -207,11 +239,7 @@ export default function PublishMaterial() {
         //Guardar en la base de  datos
         try {
             //Enviar peticion 
-            const res = await clienteAxios.post('/productos', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
-            });
+            const res = await productosService.crearProducto(formData);
 
             Swal.fire({
                 title: "Se ha registrado!",
@@ -224,10 +252,16 @@ export default function PublishMaterial() {
 
         } catch (error) {
             console.log(error)
+
+            // El backend explica por que no se pudo (p. ej. falta verificarse)
+            const mensaje = error.response && error.response.data
+                ? error.response.data.mensaje
+                : 'Vuelve a intentar';
+
             Swal.fire({
                 icon: 'error',
                 title: "Hubo un error",
-                text: 'Vuelve a intentar'
+                text: mensaje
 
             });
         }
@@ -247,7 +281,9 @@ export default function PublishMaterial() {
 
 
                 {/* CONTENIDO PRINCIPAL */}
-                <form onSubmit={agregarProducto}>
+                {/* noValidate: la validacion la hace validarProducto, asi los mensajes
+                    salen todos juntos y en español en lugar de los del navegador */}
+                <form onSubmit={agregarProducto} noValidate>
                     <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[1.05fr_1fr]">
 
                         <div
@@ -313,6 +349,7 @@ export default function PublishMaterial() {
                                         inputMode="decimal"
                                         aria-label="Precio"
                                         placeholder="Precio"
+                                        value={producto.precio}
                                         className={campo}
                                         onChange={leerInformacionProducto}
                                     />
@@ -337,7 +374,7 @@ export default function PublishMaterial() {
                                         id="zonaEncuentro"
                                         name="punto_encuentro"
                                         placeholder="Zona de encuentro"
-                                        opciones={puntos}
+                                        opciones={puntos.filter(punto => punto.estado !== false)}
                                         onChange={leerInformacionProducto}
                                     />
 
@@ -353,6 +390,8 @@ export default function PublishMaterial() {
                                         inputMode="numeric"
                                         aria-label="Stock"
                                         placeholder="Stock"
+                                        value={producto.stock}
+                                        maxLength={5}
                                         className={campo}
                                         onChange={leerInformacionProducto}
                                     />

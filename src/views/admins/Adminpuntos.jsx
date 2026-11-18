@@ -1,20 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import clienteAxios from "../../config/axios";
+import * as puntosService from "../../services/puntosService";
 import Swal from 'sweetalert2';
 import Puntos from '../../componentes/puntosEncuentro';
 
 export default function AdminPuntos() {
-    const tabs = [
-        "Verificaciones",
-        "Usuarios",
-        "Categorías",
-        "Productos",
-        "Puntos de Compra",
-        "Transacciones",
-        "Reportes",
-        "Valoraciones",
-    ];
-
     const [punto, guardarPunto] = useState({
         lugar: '',
         zona: '',
@@ -39,13 +28,13 @@ export default function AdminPuntos() {
         e.preventDefault();
         try {
 
-            const res = await clienteAxios.post('/admin/puntos', punto);
+            const res = await puntosService.crearPunto(punto);
 
             console.log(res);
 
             Swal.fire({
                 title: "¡Se ha registrado!",
-                text: res.data.mensaje,
+                text: res.mensaje,
                 icon: "success"
             });
 
@@ -67,9 +56,9 @@ export default function AdminPuntos() {
 
     const consultarAPI = async () => {
         try {
-            const puntosConsulta = await clienteAxios.get('/admin/puntos');
-            console.log(puntosConsulta.data);
-            guardarPuntos(puntosConsulta.data);
+            const puntosConsulta = await puntosService.obtenerPuntos();
+            console.log(puntosConsulta);
+            guardarPuntos(puntosConsulta);
         } catch (error) {
             console.log(error);
         }
@@ -83,11 +72,11 @@ export default function AdminPuntos() {
     const desactivarPunto = async id => {
         try {
 
-            const res = await clienteAxios.put(`/admin/puntos/${id}/desactivar`);
+            const res = await puntosService.desactivarPunto(id);
 
             Swal.fire({
                 title: "¡Desactivado!",
-                text: res.data.mensaje,
+                text: res.mensaje,
                 icon: "success"
             });
 
@@ -114,11 +103,11 @@ export default function AdminPuntos() {
     const activarPunto = async id => {
         try {
 
-            const res = await clienteAxios.put(`/admin/puntos/${id}/activar`);
+            const res = await puntosService.activarPunto(id);
 
             Swal.fire({
                 title: "¡Activado!",
-                text: res.data.mensaje,
+                text: res.mensaje,
                 icon: "success"
             });
 
@@ -145,7 +134,7 @@ export default function AdminPuntos() {
     const eliminarPunto = async id => {
 
         const confirmacion = await Swal.fire({
-            title: "¿Eliminar categoría?",
+            title: "¿Eliminar punto de encuentro?",
             text: "Esta acción no se puede deshacer",
             icon: "warning",
             showCancelButton: true,
@@ -157,11 +146,11 @@ export default function AdminPuntos() {
 
         try {
 
-            const res = await clienteAxios.delete(`/admin/puntos/${id}`);
+            const res = await puntosService.eliminarPunto(id);
 
             Swal.fire({
-                title: "¡Eliminada!",
-                text: res.data.mensaje,
+                title: "¡Eliminado!",
+                text: res.mensaje,
                 icon: "success"
             });
 
@@ -171,10 +160,11 @@ export default function AdminPuntos() {
 
             console.log(error);
 
+            // Si alguna publicacion lo usa, el backend explica que mejor se desactive
             Swal.fire({
                 icon: 'error',
-                title: "Hubo un error",
-                text: 'Intente de nuevo'
+                title: "No se pudo eliminar",
+                text: error.response?.data?.mensaje || 'Intente de nuevo'
             });
 
         }
@@ -183,18 +173,8 @@ export default function AdminPuntos() {
 
     return (
         <div className="min-h-screen w-full bg-[#FCFBF0] px-6 py-8 md:px-12 font-sans text-[#4A4A4A]">
-            {/* BARRA DE NAVEGACIÓN SUPERIOR (TABS) */}
-            <div className="mb-10 flex flex-wrap items-center justify-center gap-3 md:justify-start">
-                {tabs.map((tab, idx) => (
-                    <button
-                        key={idx}
-                        type="button"
-                        className="rounded-full bg-white px-5 py-2 text-[13px] font-bold text-[#333333] shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition hover:bg-gray-50"
-                    >
-                        {tab}
-                    </button>
-                ))}
-            </div>
+            {/* La barra de pestañas que estaba aqui era de la maqueta: repetia el menu
+                de LayoutAdmin y sus botones no hacian nada */}
 
             {/* TÍTULO GENERAL */}
             <div className="mb-8">

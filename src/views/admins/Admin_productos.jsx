@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import clienteAxios from "../../config/axios";
+import * as adminService from "../../services/adminService";
 import Swal from 'sweetalert2';
 import AdminProductosConsulta from '../../componentes/adminProductos';
 
@@ -9,9 +9,9 @@ export default function AdminProductos() {
 
     const consultarAPI = async () => {
         try {
-            const adminProductosConsulta = await clienteAxios.get('/admin/productos');
-            console.log(adminProductosConsulta.data);
-            guardarAdminProductos(adminProductosConsulta.data);
+            const adminProductosConsulta = await adminService.obtenerProductosAdmin();
+            console.log(adminProductosConsulta);
+            guardarAdminProductos(adminProductosConsulta);
         } catch (error) {
             console.log(error);
         }
@@ -20,11 +20,11 @@ export default function AdminProductos() {
      const actualizarAprobacionProducto= async (id) => {
         try {
 
-            const res = await clienteAxios.put(`admin/productos/${id}/aprobar`);
+            const res = await adminService.aprobarProducto(id);
 
             Swal.fire({
                 title: "Aporbado!",
-                text: res.data.mensaje,
+                text: res.mensaje,
                 icon: "success"
             });
 
@@ -47,11 +47,11 @@ export default function AdminProductos() {
      const actualizarRechazarProducto= async (id) => {
         try {
 
-            const res = await clienteAxios.put(`/admin/productos/${id}/rechazar`);
+            const res = await adminService.rechazarProducto(id);
 
             Swal.fire({
                 title: "¡Rechazado!",
-                text: res.data.mensaje,
+                text: res.mensaje,
                 icon: "success"
             });
 

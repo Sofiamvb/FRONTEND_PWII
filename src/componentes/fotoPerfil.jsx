@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import Swal from 'sweetalert2';
-import clienteAxios from '../config/axios';
+import * as usuariosService from '../services/usuariosService';
 import { obtenerRutaArchivo } from '../helpers/imagenes';
 
 // Foto que se muestra si el usuario todavía no ha subido una
@@ -51,16 +51,14 @@ export default function FotoPerfil({ imagen, idUsuario, onActualizada }) {
 
         try {
 
-            const res = await clienteAxios.put(`/users/imagen/${idUsuario}`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const res = await usuariosService.actualizarFotoPerfil(idUsuario, formData);
 
             // Avisamos al padre para que muestre la foto nueva
-            onActualizada(res.data.imagen);
+            onActualizada(res.imagen);
 
             Swal.fire({
                 title: '¡Listo!',
-                text: res.data.mensaje,
+                text: res.mensaje,
                 icon: 'success'
             });
 

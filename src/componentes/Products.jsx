@@ -1,7 +1,11 @@
+import { obtenerImagenPrincipal } from '../helpers/imagenes';
 
 export default function Products({producto}) {
 
-    const {_id, nombre_produ, descripcion, precio, condicion, stock, categoria, punto_encuentro} = producto;
+    const {_id, nombre_produ, descripcion, precio, condicion, stock, categoria, punto_encuentro, imagenes} = producto;
+
+    // URL completa de la imagen principal (o null si el producto no tiene imágenes)
+    const imagenPrincipal = obtenerImagenPrincipal(imagenes);
 
     return (
         <>
@@ -18,7 +22,14 @@ export default function Products({producto}) {
                         </div>
 
                         <div className="mb-4 flex h-32 w-32 items-center justify-center">
-                            <img src="/public/img/calculadora.png" alt="" />
+                            {/* Solo se dibuja la imagen si el producto tiene una */}
+                            {imagenPrincipal && (
+                                <img
+                                    src={imagenPrincipal}
+                                    alt={nombre_produ}
+                                    className="h-full w-full object-contain"
+                                />
+                            )}
                         </div>
 
                         <div className="absolute -bottom-3 max-w-[90%] truncate rounded-full bg-white/95 px-5 py-1.5 text-xs font-bold text-[#1f1f22] shadow-sm backdrop-blur-sm">

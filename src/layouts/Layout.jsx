@@ -34,19 +34,6 @@ export default function Layout() {
 
                 <div className="ml-auto flex items-center gap-4 pr-8">
 
-
-                    <Link
-                        to="/home/notifications"
-                        className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full transition-opacity hover:opacity-70">
-                        <svg width="30" height="30" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M20 37.5C21.2156 37.4988 22.4046 37.1435 23.4216 36.4775C24.4385 35.8116 25.2395 34.8638 25.7266 
-                            33.75H14.2734C14.7605 34.8638 15.5615 35.8116 16.5784 36.4775C17.5954 37.1435 18.7844 37.4988 20 37.5ZM31.25 
-                            22.5V17.7711C31.25 12.2656 29.1125 7.46953 23.75 6.25L23.125 2.5H16.875L16.25 6.25C10.8688 7.46953 8.75 
-                            12.2469 8.75 17.7711V22.5L5 27.5V31.25H35V27.5L31.25 22.5Z" fill="#FFFFED" />
-                        </svg>
-                    </Link>
-
-
                     <Link
                         to="/home/profile"
                         className="flex h-10 w-10 cursor-pointer items-center justify-center">
@@ -125,7 +112,7 @@ export default function Layout() {
 
                     <div className='py-60'>
                         <Link
-                            to="/home/reports"
+                            to="/home/reports?tipo=usuario"
                             className="w-[40px] h-[40px] flex items-center justify-center mb-6">
                             { /* Reportes */}
                             <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -1,5 +1,6 @@
 
 import { Link } from "react-router-dom";
+import { obtenerImagenPrincipal } from '../helpers/imagenes';
 
 export default function EditProduct({ publicacion }) {
 
@@ -13,6 +14,9 @@ export default function EditProduct({ publicacion }) {
         imagenes,
         disponibilidad
     } = publicacion;
+
+    // URL completa de la imagen principal de ESTE producto (o null si no tiene imágenes)
+    const imagenPrincipal = obtenerImagenPrincipal(imagenes);
 
     return (
         <div className="
@@ -39,15 +43,18 @@ export default function EditProduct({ publicacion }) {
                 bg-[#FFE96B]
             ">
 
-                <img
-                    src={imagenes?.[0]}
-                    alt={nombre_produ}
-                    className="
-                        h-[125px]
-                        w-[125px]
-                        object-contain
-                    "
-                />
+                {/* Solo se dibuja la imagen si el producto tiene una */}
+                {imagenPrincipal && (
+                    <img
+                        src={imagenPrincipal}
+                        alt={nombre_produ}
+                        className="
+                            h-[125px]
+                            w-[125px]
+                            object-contain
+                        "
+                    />
+                )}
 
                 {/* NOMBRE */}
                 <div className="

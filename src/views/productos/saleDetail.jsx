@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import clienteAxios from '../../config/axios';
 import { Link, useParams } from "react-router-dom";
 import Swal from 'sweetalert2';
+import Carrusel from '../../componentes/Carrusel';
 
 const campo = `
     h-[46px]
@@ -476,14 +477,22 @@ export default function SaleDetail() {
 
     };
 
-    const imagenPrincipal =
+    // Qué se muestra en el recuadro: por defecto el texto "Sin imagen"
+    let contenidoImagen = (
+        <p className="text-sm text-[#8B8B8B]">
+            Sin imagen
+        </p>
+    );
 
-        Array.isArray(imagenes) &&
-            imagenes.length > 0
-
-            ? imagenes[0]?.url
-
-            : null;
+    // Si el producto tiene imágenes, se muestra el carrusel
+    if (Array.isArray(imagenes) && imagenes.length > 0) {
+        contenidoImagen = (
+            <Carrusel
+                imagenes={imagenes}
+                alt={nombre_produ}
+            />
+        );
+    }
 
     return (
 
@@ -610,33 +619,8 @@ export default function SaleDetail() {
                                 "
                             >
 
-                                {imagenPrincipal ? (
-
-                                    <img
-                                        src={
-                                            `http://localhost:3000/${imagenPrincipal}`
-                                        }
-                                        alt="Imagen del producto"
-                                        className="
-                                            max-h-[310px]
-                                            max-w-[90%]
-
-                                            object-contain
-                                        "
-                                    />
-
-                                ) : (
-
-                                    <p
-                                        className="
-                                            text-sm
-                                            text-[#8B8B8B]
-                                        "
-                                    >
-                                        Sin imagen
-                                    </p>
-
-                                )}
+                                {/* Imagen principal o "Sin imagen" (se decide arriba) */}
+                                {contenidoImagen}
 
 
                                 {/* INPUT DE ARCHIVOS */}

@@ -1,6 +1,11 @@
+import { obtenerImagenPrincipal } from '../helpers/imagenes';
+
 export default function AdminProductosConsulta({producto, actualizarAprobacionProducto, actualizarRechazarProducto}) {
 
-    const { nombre_produ, condicion, usuario, precio, status_aprobado, disponibilidad } = producto;
+    const { nombre_produ, condicion, usuario, precio, status_aprobado, disponibilidad, imagenes } = producto;
+
+    // URL completa de la imagen principal (o null si el producto no tiene imágenes)
+    const imagenPrincipal = obtenerImagenPrincipal(imagenes);
 
     // Datos del vendedor (el "|| {}" evita que truene si el usuario ya no existe)
     const { name, apellidoP } = usuario || {};
@@ -45,11 +50,14 @@ export default function AdminProductosConsulta({producto, actualizarAprobacionPr
                 rounded-full
                 bg-[#FAE568]"
             >
-                <img
-                    src="/img/microcontrolador.png"
-                    alt="Microcontrolador"
-                    className="h-[48px] w-[48px] object-contain"
-                />
+                {/* Solo se dibuja la imagen si el producto tiene una */}
+                {imagenPrincipal && (
+                    <img
+                        src={imagenPrincipal}
+                        alt={nombre_produ}
+                        className="h-[48px] w-[48px] object-contain"
+                    />
+                )}
             </div>
 
             <div>

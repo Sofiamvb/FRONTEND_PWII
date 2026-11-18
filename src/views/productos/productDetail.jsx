@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import clienteAxios from '../../config/axios';
 import { Link, useParams } from "react-router-dom"
 import DisponibilidadProducto from '../../componentes/disponibilidadProducto';
-
+import Carrusel from '../../componentes/Carrusel';
 export default function ProductDetail() {
 
     const { idProducto, nombre } = useParams();
@@ -20,6 +20,8 @@ export default function ProductDetail() {
     });
 
     console.log(producto)
+
+
 
     const consultarAPI = async () => {
         const productoConsulta = await clienteAxios.get(`/productos/${idProducto}`);
@@ -100,15 +102,10 @@ export default function ProductDetail() {
                                 py-10
                             "
                         >
-                            <img
-                                src="/img/Calculadora.png"
-                                alt="Calculadora Científica"
-                                className="
-                                    h-[350px]
-                                    max-h-full
-                                    w-auto
-                                    object-contain
-                                "
+                            {/* Carrusel con todas las imágenes, empieza en la principal */}
+                            <Carrusel
+                                imagenes={producto.imagenes}
+                                alt={producto.nombre_produ}
                             />
                         </div>
 
@@ -386,7 +383,7 @@ export default function ProductDetail() {
                         </div>
 
                         <Link
-                            to="/home/reports"
+                            to={`/home/reports?tipo=producto&id=${idProducto}`}
                             className="
                                 flex
                                 min-h-[75px]

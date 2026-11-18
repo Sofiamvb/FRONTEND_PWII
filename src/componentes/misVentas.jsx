@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
+import { obtenerRutaArchivo } from '../helpers/imagenes';
 
 export default function MisVentas({ venta }) {
 
-    console.log('compra:', venta)
+    const { nombre_producto, precio_producto, estado, lugar, condicion, imagen } = venta.snapshot;
 
-    const { nombre_producto, precio_producto, estado, lugar, condicion } = venta.snapshot;
+    // El snapshot guarda el nombre del archivo de la imagen principal al momento de la compra
+    const rutaImagen = obtenerRutaArchivo(imagen);
 
     const { comprador, _id } = venta;
 
@@ -14,7 +16,7 @@ export default function MisVentas({ venta }) {
             <div
                 className="
                 grid
-                grid-cols-[2.3fr_1.25fr_0.8fr_1fr_1.55fr_0.65fr]
+                grid-cols-[2.3fr_1.25fr_0.8fr_120px]
                 items-center
                 min-h-[88px]
                 mx-8
@@ -38,11 +40,14 @@ export default function MisVentas({ venta }) {
                         rounded-full
                         bg-[#FAE568]"
                     >
-                        <img
-                            src="/img/microcontrolador.png"
-                            alt="Microcontrolador"
-                            className="h-[50px] w-[50px] object-contain"
-                        />
+                        {/* Solo se dibuja la imagen si la venta tiene una */}
+                        {rutaImagen && (
+                            <img
+                                src={rutaImagen}
+                                alt={nombre_producto}
+                                className="h-[50px] w-[50px] object-contain"
+                            />
+                        )}
                     </div>
 
                     <div className="leading-tight">

@@ -1,57 +1,274 @@
-import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from "react-router-dom";
 import clienteAxios from "../../config/axios";
 import Swal from 'sweetalert2';
+import MostrarReporte from '../../componentes/mostrarReportes';
+import BuscadorUsuario from '../../componentes/buscadorUsuario';
+import ProductoReportado from '../../componentes/productoReportado';
+import CompraReportada from '../../componentes/compraReportada';
+
+const campo = `
+    h-[46px]
+    w-full
+    rounded-[23px]
+    border
+    border-gray-100
+    bg-[#FAFAFA]
+    px-4
+    text-[16px]
+    text-[#252429]
+    shadow-[0_4px_5px_rgba(0,0,0,0.22)]
+    outline-none
+    placeholder:text-[#A1A1A1]
+`
+
+const tipo_reporte = ['producto sospechoso', 'información incorrecta', 'publicación inapropiada',
+    'usuario, fraude', 'problema en transacción']
+
+// Flecha del select
+function Flecha() {
+    return (
+        <div className="pointer-events-none absolute right-6 top-1/2 -translate-y-1/2">
+            <svg
+                width="18"
+                height="18"
+                viewBox="0 0 20 20"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <path
+                    d="M10.3087 13.196L15.6668 7.67064C16.0011 7.32586 15.7984 6.66675 15.3581 6.66675H4.64194C4.2016
+                    6.66675 3.99893 7.32586 4.33327 7.67064L9.69135 13.196C9.86894 13.3792 10.1311 13.3792 10.3087 13.196Z"
+                    fill="#252429"
+                />
+            </svg>
+        </div>
+    )
+}
+
+// Los componentes deben empezar con MAYÚSCULA, si no React los trata como etiqueta HTML
+function TipoDesplegable({ id, name, placeholder, opciones, value, onChange }) {
+    return (
+        <div className="relative">
+            <select
+                id={id}
+                name={name}
+                value={value}
+                onChange={onChange}
+                aria-label={placeholder}
+                required
+                className={`${campo} appearance-none pr-12 invalid:text-[#A1A1A1]`}
+            >
+                <option value="" disabled>
+                    {placeholder}
+                </option>
+
+                {opciones.map((opcion) => (
+                    <option key={opcion} value={opcion}>
+                        {opcion}
+                    </option>
+                ))}
+            </select>
+
+            <Flecha />
+        </div>
+    )
+}
+
+const estadoInicial = {
+    tipo_de_reporte: '',
+    usuario_reportado: '',
+    motivo: '',
+    descripcionReporte: ''
+};
 
 export default function Reports() {
 
-     //usuario = state, guaradarUsuario = funcion para guaradar el state
-    const [reportes, guardarReporte] = useState({
-        tipo_de_reporte: '',
-        usuario_reportado: '',
-        motivo: '',
-        descripcionReporte: '',
-        estadoReporte: ''
-    });
+    // Id del usuario que inició sesión (el que hace el reporte)
+    const idUsuario = sessionStorage.getItem('id');
 
-    //Leer datos del formulario
-    const actualizarState = e => {
-        //Almacenar lo que escribe el uauario en el state
-        guardarReporte({
-            //crear una copia de el state actaul
-            ...reportes,
-            [e.target.name]: e.target.value
-        })
+    // Qué se reporta, según los query params de la URL:
+    //   /home/reports?tipo=producto&id=ID_PRODUCTO → reporte de un producto
+    //   /home/reports?tipo=compra&id=ID_PEDIDO     → reporte de una compra
+    //   /home/reports?tipo=usuario                 → reporte de un usuario (buscador)
+    // Si no viene "tipo" (o viene uno desconocido), se toma como "usuario"
+    const [searchParams] = useSearchParams();
+
+    let tipo = searchParams.get('tipo');
+    const id = searchParams.get('id');
+
+    if (tipo !== 'producto' && tipo !== 'compra') {
+        tipo = 'usuario';
     }
 
-    //Añadir un cliente nuevo
-    const agregarReporte = e => {
+    // Datos del producto o de la compra preseleccionados (null mientras cargan)
+    const [producto, guardarProducto] = useState(null);
+    const [pedido, guardarPedido] = useState(null);
 
+    // State del formulario (objeto)
+    const [reporte, guardarReporte] = useState(estadoInicial);
+
+    // State de la lista "Mis Reportes" (arreglo)
+    const [misReportes, guardarMisReportes] = useState([]);
+
+    // Contador para reiniciar el buscador después de enviar
+    const [reinicioBuscador, setReinicioBuscador] = useState(0);
+
+    // Leer datos del formulario
+    const actualizarState = e => {
+        guardarReporte({
+            ...reporte,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    // El buscador avisa qué usuario se eligió: usamos actualizarState
+    // con un "evento" armado a mano para guardar su _id en usuario_reportado
+    const seleccionarUsuario = idUsuarioReportado => {
+        actualizarState({
+            target: { name: 'usuario_reportado', value: idUsuarioReportado }
+        });
+    };
+
+    // Traer los reportes que ha hecho el usuario
+    const consultarAPI = async () => {
+        try {
+            const res = await clienteAxios.get(`/productos/reportes/usuario/${idUsuario}`);
+            console.log(res.data);
+            // El backend responde { mensaje, reportes }, por eso usamos res.data.reportes
+            guardarMisReportes(res.data.reportes);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    // Traer el producto que se va a reportar (?tipo=producto)
+    const consultarProducto = async () => {
+        try {
+            const res = await clienteAxios.get(`/productos/${id}`);
+            guardarProducto(res.data);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    // Traer la compra que se va a reportar (?tipo=compra)
+    const consultarPedido = async () => {
+        try {
+            const res = await clienteAxios.get(`/pedidos/${id}`);
+            // El backend responde { mensaje, pedido }
+            guardarPedido(res.data.pedido);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    // Se vuelve a ejecutar si cambian los query params
+    useEffect(() => {
+        consultarAPI();
+
+        if (tipo === 'producto' && id) {
+            consultarProducto();
+        }
+
+        if (tipo === 'compra' && id) {
+            consultarPedido();
+        }
+    }, [tipo, id]);
+
+    // Enviar el reporte
+    const agregarReporte = async e => {
         e.preventDefault();
-        // enviar peticion
-        clienteAxios.post('/users', usuario)
-            .then(res => {
-                console.log(res)
 
-                Swal.fire({
-                    title: "Se ha registrado!",
-                    text: res.data.mensaje,
-                    icon: "success"
-                });
+        // Producto y compra necesitan el id en la URL
+        if (tipo !== 'usuario' && !id) {
+            Swal.fire({
+                icon: 'error',
+                title: "Falta información",
+                text: 'No sabemos qué quieres reportar. Entra desde el producto o la compra.'
+            });
+            return;
+        }
 
-                navigate('/auth');
+        // Reporte de usuario: es obligatorio elegirlo en el buscador
+        if (tipo === 'usuario' && !reporte.usuario_reportado) {
+            Swal.fire({
+                icon: 'error',
+                title: "Falta el usuario",
+                text: 'Busca y selecciona al usuario que quieres reportar'
+            });
+            return;
+        }
 
-            })
-            .catch(error => {
-                console.log('Error interno al guardar en la base de datos')
-                Swal.fire({
-                    icon: 'error',
-                    title: "Hubo un error",
-                    text: 'Error al registrarse'
+        // Endpoint según el tipo
+        let url = '/reportes';
 
-                });
-            })
+        if (tipo === 'producto') {
+            url = `/productos/${id}/reportar`;
+        }
 
+        if (tipo === 'compra') {
+            url = `/reportes/compra/${id}`;
+        }
+
+        try {
+
+            const res = await clienteAxios.post(url, {
+                ...reporte,
+                usuario_reporte: idUsuario
+            });
+
+            Swal.fire({
+                title: "¡Reporte enviado!",
+                text: res.data.mensaje,
+                icon: "success"
+            });
+
+            // Limpiar el formulario y recargar la lista
+            guardarReporte(estadoInicial);
+            setReinicioBuscador(reinicioBuscador + 1);
+            consultarAPI();
+
+        } catch (error) {
+
+            console.log(error);
+
+            Swal.fire({
+                icon: 'error',
+                title: "Hubo un error",
+                text: error.response?.data?.mensaje || 'Intente de nuevo'
+            });
+
+        }
+    };
+
+    // Qué se muestra en "Estas por reportar a"
+    // Por defecto: el buscador. El "key" cambia después de enviar para que se limpie
+    let seccionReportado = (
+        <BuscadorUsuario
+            key={reinicioBuscador}
+            id="usuarioReportado"
+            onSeleccionar={seleccionarUsuario}
+        />
+    );
+
+    // Producto: se muestra preseleccionado junto con su vendedor
+    if (tipo === 'producto') {
+        seccionReportado = <ProductoReportado producto={producto} />;
+    }
+
+    // Compra: se muestra la compra junto con el vendedor
+    if (tipo === 'compra') {
+        seccionReportado = <CompraReportada pedido={pedido} />;
+    }
+
+    // Producto o compra sin id: avisamos en lugar de quedarnos "cargando"
+    if (tipo !== 'usuario' && !id) {
+        seccionReportado = (
+            <div className="rounded-[14px] bg-[#FFE3E4] px-4 py-3 text-[13px] font-bold text-[#B4474A]">
+                Falta el id en la URL. Entra desde el producto o la compra que quieres reportar.
+            </div>
+        );
     }
 
     return (
@@ -66,8 +283,9 @@ export default function Reports() {
                             Reportar un Problema
                         </h1>
 
-                        {/* TARJETA DEL FORMULARIO */}
-                        <div
+                        {/* TARJETA DEL FORMULARIO (ahora es un <form>) */}
+                        <form
+                            onSubmit={agregarReporte}
                             className="
                                 flex
                                 min-h-[480px]
@@ -96,60 +314,14 @@ export default function Reports() {
                                     Tipo:
                                 </label>
 
-                                <div className="relative">
-
-                                    <select
-                                        id="tipoReporte"
-                                        defaultValue=""
-                                        className="
-                                            h-[42px]
-                                            w-full
-                                            appearance-none
-                                            rounded-[14px]
-                                            bg-[#FBFBFB]
-                                            px-4
-                                            pr-11
-                                            text-[13px]
-                                            text-[#858585]
-                                            shadow-[0_2px_5px_rgba(0,0,0,0.13)]
-                                            outline-none
-                                        "
-                                    >
-                                        <option value="" disabled>
-                                            Seleccionar
-                                        </option>
-
-                                        <option>Publicación</option>
-                                        <option>Usuario</option>
-                                        <option>Compra</option>
-                                        <option>Venta</option>
-                                    </select>
-
-                                    {/* FLECHA */}
-                                    <div
-                                        className="
-                                            pointer-events-none
-                                            absolute
-                                            right-4
-                                            top-1/2
-                                            -translate-y-1/2
-                                        "
-                                    >
-                                        <svg
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 20 20"
-                                            fill="none"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <path
-                                                d="M10.3087 13.196L15.6668 7.67064C16.0011 7.32586 15.7984 6.66675 15.3581 6.66675H4.64194C4.2016 6.66675 3.99893 7.32586 4.33327 7.67064L9.69135 13.196C9.86894 13.3792 10.1311 13.3792 10.3087 13.196Z"
-                                                fill="#252429"
-                                            />
-                                        </svg>
-                                    </div>
-
-                                </div>
+                                <TipoDesplegable
+                                    id="tipoReporte"
+                                    name="tipo_de_reporte"
+                                    placeholder="Selecciona un tipo"
+                                    opciones={tipo_reporte}
+                                    value={reporte.tipo_de_reporte}
+                                    onChange={actualizarState}
+                                />
 
                             </div>
 
@@ -166,24 +338,12 @@ export default function Reports() {
                                         text-[#252429]
                                     "
                                 >
-                                    Estas por reportar a @Usuario
+                                    Estas por reportar a
                                 </label>
 
-                                <input
-                                    id="usuarioReportado"
-                                    type="text"
-                                    className="
-                                        h-[42px]
-                                        w-full
-                                        rounded-[14px]
-                                        bg-[#FBFBFB]
-                                        px-4
-                                        text-[13px]
-                                        text-[#252429]
-                                        shadow-[0_2px_5px_rgba(0,0,0,0.13)]
-                                        outline-none
-                                    "
-                                />
+                                {/* producto → tarjeta del producto, compra → tarjeta de la compra,
+                                    usuario → buscador (se decide arriba según ?tipo=) */}
+                                {seccionReportado}
 
                             </div>
 
@@ -203,60 +363,25 @@ export default function Reports() {
                                     Motivo:
                                 </label>
 
-                                <div className="relative">
-
-                                    <select
-                                        id="motivoReporte"
-                                        defaultValue=""
-                                        className="
-                                            h-[42px]
-                                            w-full
-                                            appearance-none
-                                            rounded-[14px]
-                                            bg-[#FBFBFB]
-                                            px-4
-                                            pr-11
-                                            text-[13px]
-                                            text-[#858585]
-                                            shadow-[0_2px_5px_rgba(0,0,0,0.13)]
-                                            outline-none
-                                        "
-                                    >
-                                        <option value="" disabled>
-                                            Seleccionar
-                                        </option>
-
-                                        <option>Contenido inapropiado</option>
-                                        <option>Posible fraude</option>
-                                        <option>Información falsa</option>
-                                        <option>Comportamiento inadecuado</option>
-                                    </select>
-
-                                    {/* FLECHA */}
-                                    <div
-                                        className="
-                                            pointer-events-none
-                                            absolute
-                                            right-4
-                                            top-1/2
-                                            -translate-y-1/2
-                                        "
-                                    >
-                                        <svg
-                                            width="16"
-                                            height="16"
-                                            viewBox="0 0 20 20"
-                                            fill="none"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                            <path
-                                                d="M10.3087 13.196L15.6668 7.67064C16.0011 7.32586 15.7984 6.66675 15.3581 6.66675H4.64194C4.2016 6.66675 3.99893 7.32586 4.33327 7.67064L9.69135 13.196C9.86894 13.3792 10.1311 13.3792 10.3087 13.196Z"
-                                                fill="#252429"
-                                            />
-                                        </svg>
-                                    </div>
-
-                                </div>
+                                <input
+                                    id="motivoReporte"
+                                    type="text"
+                                    name='motivo'
+                                    value={reporte.motivo}
+                                    onChange={actualizarState}
+                                    required
+                                    className="
+                                        h-[42px]
+                                        w-full
+                                        rounded-[14px]
+                                        bg-[#FBFBFB]
+                                        px-4
+                                        text-[13px]
+                                        text-[#252429]
+                                        shadow-[0_2px_5px_rgba(0,0,0,0.13)]
+                                        outline-none
+                                    "
+                                />
 
                             </div>
 
@@ -279,6 +404,10 @@ export default function Reports() {
                                 <textarea
                                     id="descripcionReporte"
                                     rows="6"
+                                    name='descripcionReporte'
+                                    value={reporte.descripcionReporte}
+                                    onChange={actualizarState}
+                                    required
                                     className="
                                         min-h-[120px]
                                         w-full
@@ -296,7 +425,7 @@ export default function Reports() {
                             </div>
 
                             <button
-                                type="button"
+                                type="submit"
                                 className="
                                     mt-auto
                                     flex
@@ -317,7 +446,7 @@ export default function Reports() {
                                 Enviar
                             </button>
 
-                        </div>
+                        </form>
 
                     </div>
 
@@ -343,139 +472,15 @@ export default function Reports() {
                             "
                         >
 
-                            {/* REPORTE */}
-                            <div
-                                className="
-                                    flex
-                                    min-h-[62px]
-                                    w-full
-                                    items-center
-                                    justify-between
-                                    gap-4
-                                    rounded-[16px]
-                                    bg-[#FFFDF8]
-                                    px-5
-                                    py-3
-                                    shadow-[0_2px_6px_rgba(0,0,0,0.13)]
-                                "
-                            >
-
-                                {/* INFORMACIÓN */}
-                                <div>
-
-                                    <h2
-                                        className="
-                                            text-[13px]
-                                            font-extrabold
-                                            text-[#252429]
-                                        "
-                                    >
-                                        Publicación Inapropiada
-                                    </h2>
-
-                                    <p
-                                        className="
-                                            mt-1
-                                            max-w-[185px]
-                                            text-[11px]
-                                            font-medium
-                                            leading-[14px]
-                                            text-[#9A9A9A]
-                                        "
-                                    >
-                                        Una publicacion fuera de lugar en la pagina
-                                    </p>
-
-                                </div>
-
-                                {/* ESTADO */}
-                                <span
-                                    className="
-                                        flex
-                                        h-[25px]
-                                        shrink-0
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FFF0AD]
-                                        px-4
-                                        text-[11px]
-                                        font-medium
-                                        text-[#252429]
-                                        shadow-[0_2px_4px_rgba(0,0,0,0.14)]
-                                    "
-                                >
-                                    Pendiente
-                                </span>
-
-                            </div>
-
-                            {/* REPORTE */}
-                            <div
-                                className="
-                                    flex
-                                    min-h-[62px]
-                                    w-full
-                                    items-center
-                                    justify-between
-                                    gap-4
-                                    rounded-[16px]
-                                    bg-[#FFFDF8]
-                                    px-5
-                                    py-3
-                                    shadow-[0_2px_6px_rgba(0,0,0,0.13)]
-                                "
-                            >
-
-                                {/* INFORMACIÓN */}
-                                <div>
-
-                                    <h2
-                                        className="
-                                            text-[13px]
-                                            font-extrabold
-                                            text-[#252429]
-                                        "
-                                    >
-                                        Posible Fraude
-                                    </h2>
-
-                                    <p
-                                        className="
-                                            mt-1
-                                            max-w-[185px]
-                                            text-[11px]
-                                            font-medium
-                                            leading-[14px]
-                                            text-[#9A9A9A]
-                                        "
-                                    >
-                                        Publicacion engañosa para los usuarios
-                                    </p>
-
-                                </div>
-
-                                {/* ESTADO */}
-                                <span
-                                    className="
-                                        flex
-                                        h-[25px]
-                                        shrink-0
-                                        items-center
-                                        justify-center
-                                        rounded-full
-                                        bg-[#FFF0AD]
-                                        px-4
-                                        text-[11px]
-                                        font-medium
-                                        text-[#252429]
-                                        shadow-[0_2px_4px_rgba(0,0,0,0.14)]
-                                    "
-                                >
-                                    Pendiente
-                                </span>
-
-                            </div>
+                            {/* Cada reporte dibuja su propia tarjetita (está en el componente) */}
+                            {
+                                misReportes.map(rep => (
+                                    <MostrarReporte
+                                        key={rep._id}
+                                        reporte={rep}
+                                    />
+                                ))
+                            }
 
                         </div>
 

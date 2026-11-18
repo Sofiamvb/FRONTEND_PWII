@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import clienteAxios from "../../config/axios";
 import Swal from 'sweetalert2';
+import FotoPerfil from '../../componentes/fotoPerfil';
 
 export default function Profile(props) {
 
@@ -53,6 +54,14 @@ export default function Profile(props) {
 
     }
 
+    // Cuando se sube una foto nueva, la guardamos en el state para que se vea al momento
+    const actualizarFoto = nombreArchivo => {
+        datosUsuario({
+            ...usuario,
+            imagen: nombreArchivo
+        });
+    }
+
     const actualizarPassword = e => {
         e.preventDefault();
         clienteAxios.put(`/users/password/${idUsuario}`, usuario)
@@ -83,10 +92,11 @@ export default function Profile(props) {
                             <div className="h-full w-full bg-[#FBFAF5] flex items-center justify-center">
 
 
-                                <img
-                                    src="/public/img/profile.png"
-                                    alt="Foto de perfil"
-                                    className="h-full w-full object-cover"
+                                {/* Foto de perfil: clic para cambiarla */}
+                                <FotoPerfil
+                                    imagen={usuario.imagen}
+                                    idUsuario={idUsuario}
+                                    onActualizada={actualizarFoto}
                                 />
 
                             </div>

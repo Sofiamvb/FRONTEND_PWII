@@ -36,13 +36,13 @@ export default function Sales() {
 
                     <div className="w-full overflow-x-auto">
 
-                        <div className="min-w-[1050px] w-full overflow-hidden bg-[#FFFDF8] shadow-[0_3px_6px_rgba(0,0,0,0.20)]">
+                        <div className="min-w-[720px] w-full overflow-hidden bg-[#FFFDF8] shadow-[0_3px_6px_rgba(0,0,0,0.20)]">
 
                             {/* ENCABEZADO */}
                             <div
                                 className="
                                     grid
-                                    grid-cols-[2.3fr_1.25fr_0.8fr_1fr_1.55fr_0.65fr]
+                                    grid-cols-[2.3fr_1.25fr_0.8fr_120px]
                                     items-center
                                     min-h-[68px]
                                     bg-[#F9E67D]
@@ -56,7 +56,6 @@ export default function Sales() {
                                 <span>Comprador</span>
                                 <span>Precio</span>
                                 <span>Estado</span>
-                                <span></span>
                             </div>
 
                             {

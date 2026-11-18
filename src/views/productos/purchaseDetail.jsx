@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import clienteAxios from '../../config/axios';
 import { Link, useParams } from "react-router-dom"
+import { obtenerRutaArchivo } from '../../helpers/imagenes';
 
 // Datos de la compra (más adelante puedes reemplazarlos por props o datos de tu API)
 const compra = {
-    imagen: "/img/Calculadora.png",
     carrera: "UANL - FIME",
     estadoPago: "Liberado",
     calificacion: 3,
@@ -43,6 +43,9 @@ export default function PurchaseDetail() {
         return <p>cargando...</p>
 
     }
+
+    // Imagen principal guardada en el snapshot al momento de la compra
+    const rutaImagen = obtenerRutaArchivo(datosPedido.pedido.snapshot.imagen);
 
     return (
 
@@ -91,11 +94,14 @@ export default function PurchaseDetail() {
                                         bg-[#83CBFC]
                                     "
                                 >
-                                    <img
-                                        src={compra.imagen}
-                                        alt={datosPedido.pedido.snapshot.nombre_producto}
-                                        className="h-[58px] w-[58px] object-contain"
-                                    />
+                                    {/* Solo se dibuja la imagen si la compra tiene una */}
+                                    {rutaImagen && (
+                                        <img
+                                            src={rutaImagen}
+                                            alt={datosPedido.pedido.snapshot.nombre_producto}
+                                            className="h-[58px] w-[58px] object-contain"
+                                        />
+                                    )}
                                 </div>
 
 
@@ -399,7 +405,7 @@ export default function PurchaseDetail() {
 
 
                         <Link
-                            to="/home/reports"
+                            to={`/home/reports?tipo=compra&id=${idPedido}`}
                             className="
                                 flex
                                 min-h-[50px]
